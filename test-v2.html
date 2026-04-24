@@ -29,11 +29,8 @@
 
         /* ── Botones de opción responsivos ── */
         .option-btn {
-            /* Tamaño base para desktop */
-            width: 48px;
-            height: 48px;
-            min-width: 48px;
-            aspect-ratio: 1/1;
+            width: clamp(42px, 11vw, 52px);
+            height: clamp(42px, 11vw, 52px);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -42,31 +39,11 @@
             cursor: pointer;
             transition: all 0.2s;
             flex-shrink: 0;
-            font-size: 1rem;
+            font-size: clamp(0.85rem, 3vw, 1rem);
             font-weight: 700;
             user-select: none;
             -webkit-user-select: none;
-            /* Área táctil mínima */
             touch-action: manipulation;
-        }
-
-        /* En pantallas pequeñas, ajustar tamaño para que no desborden */
-        @media (max-width: 420px) {
-            .option-btn {
-                width: 44px;
-                height: 44px;
-                min-width: 44px;
-                font-size: 0.9rem;
-            }
-        }
-
-        @media (max-width: 360px) {
-            .option-btn {
-                width: 38px;
-                height: 38px;
-                min-width: 38px;
-                font-size: 0.8rem;
-            }
         }
 
         .option-input:checked + .option-btn {
@@ -86,13 +63,30 @@
             color: white;
         }
 
-        /* Contenedor de opciones: garantiza que no desborde */
+        /* Contenedor de opciones: centrado, sin overflow */
         .options-row {
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: clamp(6px, 2vw, 12px);
+            gap: clamp(8px, 2.5vw, 14px);
             flex-wrap: nowrap;
+            width: 100%;
+        }
+
+        /* Bloque rating completo: labels encima/debajo de los botones */
+        .rating-block {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+        }
+
+        .rating-labels {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            padding: 0 4px;
         }
     </style>
 </head>
@@ -128,9 +122,7 @@
 
             <p id="question-text" class="text-xl text-center mb-12 min-h-[80px] font-medium"></p>
 
-            <div class="flex justify-between items-center mb-12 px-1">
-                <span class="text-[9px] text-zinc-600 uppercase font-bold leading-tight text-left" style="max-width:40px">Inaccurate</span>
-
+            <div class="rating-block mb-10">
                 <div class="options-row">
                     <input type="radio" name="q" id="r1" value="1" class="hidden option-input" onchange="enableNext()"><label for="r1" class="option-btn">1</label>
                     <input type="radio" name="q" id="r2" value="2" class="hidden option-input" onchange="enableNext()"><label for="r2" class="option-btn">2</label>
@@ -138,8 +130,10 @@
                     <input type="radio" name="q" id="r4" value="4" class="hidden option-input" onchange="enableNext()"><label for="r4" class="option-btn">4</label>
                     <input type="radio" name="q" id="r5" value="5" class="hidden option-input" onchange="enableNext()"><label for="r5" class="option-btn">5</label>
                 </div>
-
-                <span class="text-[9px] text-zinc-600 uppercase font-bold leading-tight text-right" style="max-width:40px">Accurate</span>
+                <div class="rating-labels">
+                    <span class="text-[9px] text-zinc-600 uppercase font-bold tracking-wider">Inaccurate</span>
+                    <span class="text-[9px] text-zinc-600 uppercase font-bold tracking-wider">Accurate</span>
+                </div>
             </div>
 
             <button id="next-btn" onclick="nextQuestion()" disabled
@@ -240,18 +234,6 @@
         let responses   = {};
         let startTime   = null;
         let timerInterval = null;
-        let testInProgress = false;   // controla el onbeforeunload
-
-        /* ════════════════════════════════════════════════
-           PREVENCIÓN DE CIERRE / REFRESCO
-        ════════════════════════════════════════════════ */
-        window.onbeforeunload = function(e) {
-            if (testInProgress) {
-                e.preventDefault();
-                e.returnValue = ""; // Muestra el diálogo nativo del navegador
-                return "";
-            }
-        };
 
         /* ════════════════════════════════════════════════
            HELPERS DE LOCALSTORAGE
@@ -263,27 +245,26 @@
 
         function loadState() {
             try {
-                const savedName  = localStorage.getItem(LS_KEY.name);
-                const savedEmail = localStorage.getItem(LS_KEY.email);
                 const savedOrder = localStorage.getItem(LS_KEY.order);
                 const savedResp  = localStorage.getItem(LS_KEY.responses);
                 const savedIdx   = localStorage.getItem(LS_KEY.idx);
                 const savedTime  = localStorage.getItem(LS_KEY.startTime);
+                const savedName  = localStorage.getItem(LS_KEY.name);
+                const savedEmail = localStorage.getItem(LS_KEY.email);
 
-                // Si existe una sesión guardada con todos los datos necesarios, restaurarla
-                if (savedName && savedEmail && savedOrder && savedResp !== null && savedIdx !== null) {
-                    document.getElementById('user-name').value  = savedName;
-                    document.getElementById('user-email').value = savedEmail;
+                if (savedOrder && savedResp !== null && savedIdx !== null) {
+                    // Pre-rellenar campos si no los tiene ya el usuario
+                    if (savedName)  document.getElementById('user-name').value  = savedName;
+                    if (savedEmail) document.getElementById('user-email').value = savedEmail;
 
                     shuffledQuestions = JSON.parse(savedOrder).map(id => rawQuestions.find(q => q.id === id));
                     responses  = JSON.parse(savedResp);
                     currentIdx = JSON.parse(savedIdx);
                     startTime  = savedTime ? new Date(JSON.parse(savedTime)) : new Date();
 
-                    return true; // sesión recuperada
+                    return true;
                 }
             } catch(err) {
-                // Si hay cualquier error, ignorar y empezar desde cero
                 clearStorage();
             }
             return false;
@@ -299,17 +280,21 @@
         function startTest() {
             const name  = document.getElementById('user-name').value.trim();
             const email = document.getElementById('user-email').value.trim();
-            if (name.length < 3 || !email.includes('@')) {
-                return alert("Please enter a valid name and email.");
+
+            // Validar: al menos 2 palabras en el nombre
+            const nameParts = name.split(/\s+/).filter(w => w.length > 0);
+            if (nameParts.length < 2) {
+                return alert("Please enter your full name (first and last name).");
+            }
+            if (!email.includes('@')) {
+                return alert("Please enter a valid email address.");
             }
 
-            // ¿Hay una sesión guardada con los mismos datos?
-            const savedName  = localStorage.getItem(LS_KEY.name);
+            // Restauración ligada al email: si el email coincide con una sesión guardada, restaurar
             const savedEmail = localStorage.getItem(LS_KEY.email);
             const savedOrder = localStorage.getItem(LS_KEY.order);
 
-            if (savedName === name && savedEmail === email && savedOrder) {
-                // Restaurar sesión existente
+            if (savedEmail === email && savedOrder) {
                 const restored = loadState();
                 if (restored) {
                     beginTestUI();
@@ -334,7 +319,6 @@
         }
 
         function beginTestUI() {
-            testInProgress = true;
             document.getElementById('start-screen').classList.add('hidden');
             document.getElementById('test-screen').classList.remove('hidden');
             if (timerInterval) clearInterval(timerInterval);
@@ -398,9 +382,6 @@
              por el Google Apps Script
         ════════════════════════════════════════════════ */
         async function submitTest() {
-            // Desactivar la advertencia de cierre antes de enviar
-            testInProgress = false;
-
             document.getElementById('test-screen').innerHTML =
                 "<div class='text-center py-20 animate-pulse text-zinc-500 uppercase tracking-widest font-bold'>Sending Results...</div>";
 
