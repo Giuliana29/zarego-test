@@ -3,288 +3,140 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Zarego Personality Assessment</title>
+    <title>Zarego Personality Test</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root {
-            --zarego-bg: #0A0A0A;
-            --zarego-card: #141414;
-            --zarego-cyan: #00D2FF;
-            --zarego-magenta: #FF0055;
-            --zarego-text: #FFFFFF;
-            --zarego-muted: #A0A0A0;
-        }
-
-        body { background-color: var(--zarego-bg); color: var(--zarego-text); overflow-x: hidden; }
-
-        .option-input:checked + label { 
-            background: linear-gradient(90deg, var(--zarego-cyan), var(--zarego-magenta));
-            color: white; 
-            border-color: transparent;
-            transform: scale(1.1);
-            box-shadow: 0 0 15px rgba(0, 210, 255, 0.4);
-        }
-
+        :root { --zarego-bg: #0A0A0A; --zarego-cyan: #00D2FF; --zarego-magenta: #FF0055; }
+        body { background-color: var(--zarego-bg); color: white; font-family: sans-serif; overflow-x: hidden; }
+        
+        /* Círculos Perfectos Correctos */
         .option-btn {
-            border: 2px solid #333;
-            background-color: transparent;
-            color: var(--zarego-muted);
-            transition: all 0.2s ease-in-out;
-            user-select: none;
+            width: 44px; height: 44px; min-width: 44px; aspect-ratio: 1/1;
+            display: flex; align-items: center; justify-content: center;
+            border: 2px solid #333; border-radius: 50%;
+            cursor: pointer; transition: all 0.2s; flex-shrink: 0;
         }
-
-        .option-btn:hover {
-            border-color: var(--zarego-cyan);
-            color: white;
+        
+        .option-input:checked + .option-btn {
+            background: linear-gradient(90deg, var(--zarego-cyan), var(--zarego-magenta));
+            border-color: transparent; color: white; transform: scale(1.1);
         }
-
-        .btn-zarego {
-            background: linear-gradient(90deg, var(--zarego-cyan) 0%, var(--zarego-magenta) 100%);
-            transition: opacity 0.3s;
-        }
-        .btn-zarego:hover { opacity: 0.9; }
-        .btn-zarego:disabled { opacity: 0.5; cursor: not-allowed; }
-
-        #timer-display { color: var(--zarego-cyan); font-variant-numeric: tabular-nums; }
-        .progress-bar { background: linear-gradient(90deg, var(--zarego-cyan), var(--zarego-magenta)); }
-
-        .input-zarego {
-            background-color: #1A1A1A;
-            border: 1px solid #333;
-            color: white;
-        }
-        .input-zarego:focus {
-            border-color: var(--zarego-cyan);
-            outline: none;
-            box-shadow: 0 0 0 2px rgba(0, 210, 255, 0.2);
-        }
-
-        /* Mobile Optimization */
-        @media (max-width: 480px) {
-            .option-btn { width: 2rem; height: 2rem; font-size: 0.8rem; }
-            .label-text { font-size: 0.55rem !important; }
-            .grid-scale { grid-template-columns: 60px 1fr 60px !important; }
-        }
+        .btn-zarego { background: linear-gradient(90deg, var(--zarego-cyan), var(--zarego-magenta)); }
+        .input-zarego { background: #1A1A1A; border: 1px solid #333; color: white; }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center py-6 sm:py-10 px-4 font-sans text-zinc-100">
+<body class="min-h-screen flex items-center justify-center p-4">
 
-    <div id="form-container" class="max-w-xl w-full bg-[#141414] rounded-3xl shadow-2xl border border-[#222] p-6 sm:p-10 transition-all duration-300">
-        <div class="text-center py-20 text-zinc-500 italic animate-pulse">Validating Access Token...</div>
+    <div id="app" class="max-w-xl w-full bg-[#141414] rounded-3xl p-8 border border-[#222] shadow-2xl">
+        
+        <div id="start-screen">
+            <h1 class="text-3xl font-black mb-6 uppercase tracking-tighter text-center">
+                Zarego <span class="text-[#00D2FF]">Personality</span> Test
+            </h1>
+            <div class="text-zinc-400 text-sm mb-8 space-y-4 text-center">
+                <p>This assessment presents a series of statements about your behavior. Indicate to what extent it applies to you from <strong>1 (Inaccurate)</strong> to <strong>5 (Accurate)</strong>.</p>
+                <p>There are no right or wrong answers—follow your first instinct. We recommend completing this in a single session.</p>
+            </div>
+            <input type="text" id="user-name" placeholder="Full Name" class="input-zarego w-full p-4 rounded-xl mb-4 outline-none focus:border-[#00D2FF]">
+            <input type="email" id="user-email" placeholder="Email Address" class="input-zarego w-full p-4 rounded-xl mb-8 outline-none focus:border-[#00D2FF]">
+            <button onclick="startTest()" class="btn-zarego w-full py-4 rounded-xl font-bold uppercase tracking-widest active:scale-95 transition-transform">Start Assessment</button>
+        </div>
+
+        <div id="test-screen" class="hidden">
+            <div class="flex justify-between text-[10px] text-zinc-500 mb-4 uppercase font-bold tracking-widest">
+                <span id="progress-text">1/50</span> <span id="timer">00:00</span>
+            </div>
+            <div class="w-full bg-zinc-800 h-1 rounded-full mb-10">
+                <div id="progress-bar" class="h-1 btn-zarego rounded-full transition-all" style="width: 0%"></div>
+            </div>
+            <p id="question-text" class="text-xl text-center mb-12 min-h-[80px] font-medium"></p>
+            
+            <div class="flex justify-between items-center mb-12 px-2">
+                <span class="text-[9px] text-zinc-600 uppercase font-bold">Inaccurate</span>
+                <div class="flex gap-2">
+                    <input type="radio" name="q" id="r1" value="1" class="hidden option-input" onchange="enableNext()"><label for="r1" class="option-btn font-bold">1</label>
+                    <input type="radio" name="q" id="r2" value="2" class="hidden option-input" onchange="enableNext()"><label for="r2" class="option-btn font-bold">2</label>
+                    <input type="radio" name="q" id="r3" value="3" class="hidden option-input" onchange="enableNext()"><label for="r3" class="option-btn font-bold">3</label>
+                    <input type="radio" name="q" id="r4" value="4" class="hidden option-input" onchange="enableNext()"><label for="r4" class="option-btn font-bold">4</label>
+                    <input type="radio" name="q" id="r5" value="5" class="hidden option-input" onchange="enableNext()"><label for="r5" class="option-btn font-bold">5</label>
+                </div>
+                <span class="text-[9px] text-zinc-600 uppercase font-bold text-right">Accurate</span>
+            </div>
+            <button id="next-btn" onclick="nextQuestion()" disabled class="btn-zarego w-full py-4 rounded-xl font-bold uppercase opacity-50 transition-all">Next</button>
+        </div>
+
+        <div id="final-screen" class="hidden text-center py-10">
+            <div class="text-[#00D2FF] mb-6 flex justify-center">
+                <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+            </div>
+            <h2 class="text-4xl font-black mb-4 uppercase">Done!</h2>
+            <p class="text-zinc-400">Your results have been recorded.</p>
+        </div>
     </div>
 
     <script>
         const API_URL = "https://script.google.com/macros/s/AKfycbyenKVTcMrv2BeHVpQ_BCt1MfWUvGGdgYfS6U52G20hR42UUc5ILV9jP88WLVqtq6x9DQ/exec";
+
+        const questions = [{id:1,text:"Have a rich vocabulary.",cat:"O",rev:false},{id:2,text:"Am full of ideas.",cat:"O",rev:false},{id:3,text:"Am quick to understand complex concepts.",cat:"O",rev:false},{id:4,text:"See beauty in things that others might not notice.",cat:"O",rev:false},{id:5,text:"Enjoy trying new and unfamiliar things.",cat:"O",rev:false},{id:6,text:"Am curious about many different topics.",cat:"O",rev:false},{id:7,text:"Prefer to stick with things that I know.",cat:"O",rev:true},{id:8,text:"Dislike changes.",cat:"O",rev:true},{id:9,text:"Avoid philosophical discussions.",cat:"O",rev:true},{id:10,text:"Do not have a good imagination.",cat:"O",rev:true},{id:11,text:"Pay attention to details.",cat:"C",rev:false},{id:12,text:"Follow a schedule.",cat:"C",rev:false},{id:13,text:"Plan tasks carefully before starting them.",cat:"C",rev:false},{id:14,text:"Finish what I start.",cat:"C",rev:false},{id:15,text:"Keep my promises.",cat:"C",rev:false},{id:16,text:"Work hard to achieve my goals.",cat:"C",rev:false},{id:17,text:"Often forget to put things back in their proper place.",cat:"C",rev:true},{id:18,text:"Find it difficult to stay focused on tasks.",cat:"C",rev:true},{id:19,text:"Start tasks right away.",cat:"C",rev:false},{id:20,text:"Act without thinking things through.",cat:"C",rev:true},{id:21,text:"Feel comfortable around people.",cat:"E",rev:false},{id:22,text:"Make friends easily.",cat:"E",rev:false},{id:23,text:"Start conversations.",cat:"E",rev:false},{id:24,text:"Am the life of the party.",cat:"E",rev:false},{id:25,text:"Enjoy being the center of attention.",cat:"E",rev:false},{id:26,text:"Feel energized when I am around others.",cat:"E",rev:false},{id:27,text:"Don’t talk a lot.",cat:"E",rev:true},{id:28,text:"Keep in the background.",cat:"E",rev:true},{id:29,text:"Prefer to spend time alone.",cat:"E",rev:true},{id:30,text:"Find it difficult to approach others.",cat:"E",rev:true},{id:31,text:"Sympathize with others’ feelings.",cat:"A",rev:false},{id:32,text:"Take time out for others.",cat:"A",rev:false},{id:33,text:"Trust others.",cat:"A",rev:false},{id:34,text:"Love to help others.",cat:"A",rev:false},{id:35,text:"Am considerate and kind to almost everyone.",cat:"A",rev:false},{id:36,text:"Am willing to compromise to avoid conflict.",cat:"A",rev:false},{id:37,text:"Am not interested in other people’s problems.",cat:"A",rev:true},{id:38,text:"Use flattery to get ahead.",cat:"A",rev:true},{id:39,text:"Believe that I am better than others.",cat:"A",rev:true},{id:40,text:"Can be rude to others.",cat:"A",rev:true},{id:41,text:"Get stressed out easily.",cat:"N",rev:false},{id:42,text:"Worry about things.",cat:"N",rev:false},{id:43,text:"Get irritated easily.",cat:"N",rev:false},{id:44,text:"Change my mood frequently.",cat:"N",rev:false},{id:45,text:"Feel insecure about myself.",cat:"N",rev:false},{id:46,text:"Often feel anxious or tense.",cat:"N",rev:false},{id:47,text:"Am relaxed most of the time.",cat:"N",rev:true},{id:48,text:"Remain calm under pressure.",cat:"N",rev:true},{id:49,text:"Am easily intimidated.",cat:"N",rev:false},{id:50,text:"Feel emotionally stable most of the time.",cat:"N",rev:true}];
         
-        const questions = [
-            { id: 1, text: "Have a rich vocabulary.", cat: "O", rev: false },
-            { id: 2, text: "Am full of ideas.", cat: "O", rev: false },
-            { id: 3, text: "Am quick to understand complex concepts.", cat: "O", rev: false },
-            { id: 4, text: "See beauty in things that others might not notice.", cat: "O", rev: false },
-            { id: 5, text: "Enjoy trying new and unfamiliar things.", cat: "O", rev: false },
-            { id: 6, text: "Am curious about many different topics.", cat: "O", rev: false },
-            { id: 7, text: "Prefer to stick with things that I know.", cat: "O", rev: true },
-            { id: 8, text: "Dislike changes.", cat: "O", rev: true },
-            { id: 9, text: "Avoid philosophical discussions.", cat: "O", rev: true },
-            { id: 10, text: "Do not have a good imagination.", cat: "O", rev: true },
-            { id: 11, text: "Pay attention to details.", cat: "C", rev: false },
-            { id: 12, text: "Follow a schedule.", cat: "C", rev: false },
-            { id: 13, text: "Plan tasks carefully before starting them.", cat: "C", rev: false },
-            { id: 14, text: "Finish what I start.", cat: "C", rev: false },
-            { id: 15, text: "Keep my promises.", cat: "C", rev: false },
-            { id: 16, text: "Work hard to achieve my goals.", cat: "C", rev: false },
-            { id: 17, text: "Often forget to put things back in their proper place.", cat: "C", rev: true },
-            { id: 18, text: "Find it difficult to stay focused on tasks.", cat: "C", rev: true },
-            { id: 19, text: "Start tasks right away.", cat: "C", rev: false },
-            { id: 20, text: "Act without thinking things through.", cat: "C", rev: true },
-            { id: 21, text: "Feel comfortable around people.", cat: "E", rev: false },
-            { id: 22, text: "Make friends easily.", cat: "E", rev: false },
-            { id: 23, text: "Start conversations.", cat: "E", rev: false },
-            { id: 24, text: "Am the life of the party.", cat: "E", rev: false },
-            { id: 25, text: "Enjoy being the center of attention.", cat: "E", rev: false },
-            { id: 26, text: "Feel energized when I am around others.", cat: "E", rev: false },
-            { id: 27, text: "Don’t talk a lot.", cat: "E", rev: true },
-            { id: 28, text: "Keep in the background.", cat: "E", rev: true },
-            { id: 29, text: "Prefer to spend time alone.", cat: "E", rev: true },
-            { id: 30, text: "Find it difficult to approach others.", cat: "E", rev: true },
-            { id: 31, text: "Sympathize with others’ feelings.", cat: "A", rev: false },
-            { id: 32, text: "Take time out for others.", cat: "A", rev: false },
-            { id: 33, text: "Trust others.", cat: "A", rev: false },
-            { id: 34, text: "Love to help others.", cat: "A", rev: false },
-            { id: 35, text: "Am considerate and kind to almost everyone.", cat: "A", rev: false },
-            { id: 36, text: "Am willing to compromise to avoid conflict.", cat: "A", rev: false },
-            { id: 37, text: "Am not interested in other people’s problems.", cat: "A", rev: true },
-            { id: 38, text: "Use flattery to get ahead.", cat: "A", rev: true },
-            { id: 39, text: "Believe that I am better than others.", cat: "A", rev: true },
-            { id: 40, text: "Can be rude to others.", cat: "A", rev: true },
-            { id: 41, text: "Get stressed out easily.", cat: "N", rev: false },
-            { id: 42, text: "Worry about things.", cat: "N", rev: false },
-            { id: 43, text: "Get irritated easily.", cat: "N", rev: false },
-            { id: 44, text: "Change my mood frequently.", cat: "N", rev: false },
-            { id: 45, text: "Feel insecure about myself.", cat: "N", rev: false },
-            { id: 46, text: "Often feel anxious or tense.", cat: "N", rev: false },
-            { id: 47, text: "Am relaxed most of the time.", cat: "N", rev: true },
-            { id: 48, text: "Remain calm under pressure.", cat: "N", rev: true },
-            { id: 49, text: "Am easily intimidated.", cat: "N", rev: false },
-            { id: 50, text: "Feel emotionally stable most of the time.", cat: "N", rev: true }
-        ];
+        let currentIdx = 0, responses = {}, startTime;
 
-        let shuffledQuestions = [...questions].sort(() => Math.random() - 0.5);
-        let currentIndex = 0;
-        let userToken = "";
-        const responses = {}; 
-        let userData = { nombre: "", email: "" };
-        let startTime, timerInterval;
-
-        async function validateToken() {
-            const urlParams = new URLSearchParams(window.location.search);
-            userToken = urlParams.get('token');
-            if (!userToken) {
-                showError("Access Denied", "A valid security token is required to start the test. Please check your invitation email.");
-                return;
-            }
-            try {
-                const response = await fetch(`${API_URL}?token=${userToken}`);
-                const result = await response.json();
-                if (result.valid) {
-                    userData.email = result.email;
-                    initApp();
-                } else {
-                    showError("Invalid or Used Token", "This link is no longer active. If you had a technical issue, please contact support for a new link.");
-                }
-            } catch (e) {
-                showError("Connection Error", "Could not verify token. Please refresh or check your internet connection.");
-            }
+        function startTest() {
+            const n = document.getElementById('user-name').value, e = document.getElementById('user-email').value;
+            if(n.length < 3 || !e.includes('@')) return alert("Please enter valid name and email.");
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('test-screen').classList.remove('hidden');
+            startTime = new Date(); setInterval(updateTimer, 1000); showQuestion();
         }
 
-        function showError(title, msg) {
-            document.getElementById('form-container').innerHTML = `
-                <div class="text-center py-10 px-4">
-                    <div class="text-zinc-600 mb-6 flex justify-center">
-                        <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
-                    </div>
-                    <h2 class="text-2xl font-black text-white mb-4 uppercase tracking-tighter">${title}</h2>
-                    <p class="text-zinc-400 text-sm leading-relaxed">${msg}</p>
-                </div>`;
+        function showQuestion() {
+            const q = questions[currentIdx];
+            document.getElementById('question-text').innerText = q.text;
+            document.getElementById('progress-text').innerText = `${currentIdx + 1}/50`;
+            document.getElementById('progress-bar').style.width = `${((currentIdx + 1) / 50) * 100}%`;
+            document.querySelectorAll('.option-input').forEach(i => i.checked = false);
+            document.getElementById('next-btn').disabled = true;
+            document.getElementById('next-btn').classList.add('opacity-50');
         }
 
-        window.validateAndStart = function() {
-            const name = document.getElementById('user-name').value.trim();
-            if (name.split(/\s+/).length < 2) {
-                alert("Please enter your full name.");
-                return;
-            }
-            userData.nombre = name;
-            startTime = new Date();
-            timerInterval = setInterval(updateTimer, 1000);
-            renderQuestion();
-        };
-
-        window.renderQuestion = function() {
-            const container = document.getElementById('form-container');
-            const q = shuffledQuestions[currentIndex];
-            const currentNumber = currentIndex + 1;
-            const total = shuffledQuestions.length;
-            const progressPct = (currentNumber / total) * 100;
-            
-            let html = `
-                <div class="flex justify-between items-center mb-6 text-[10px] sm:text-xs font-bold text-zinc-500 uppercase tracking-widest px-1">
-                    <span>TIME: <span id="timer-display">00:00</span></span>
-                    <span>${currentNumber}/${total}</span>
-                </div>
-                <div class="w-full bg-zinc-800 h-1.5 rounded-full mb-10 overflow-hidden">
-                    <div class="progress-bar h-full transition-all duration-500" style="width: ${progressPct}%"></div>
-                </div>
-                <div class="mb-12 min-h-[160px] flex flex-col justify-center px-1">
-                    <p class="text-xl sm:text-2xl font-medium mb-10 text-zinc-100 leading-snug text-center">${q.text}</p>
-                    <div class="grid grid-cols-[65px_1fr_65px] items-center w-full grid-scale">
-                        <span class="label-text text-[9px] uppercase font-bold text-zinc-600 text-left leading-tight">Inaccurate</span>
-                        <div class="flex justify-around items-center px-1">
-                            ${[1, 2, 3, 4, 5].map(num => `
-                                <div class="flex flex-col items-center">
-                                    <input type="radio" id="q${q.id}_${num}" name="q${q.id}" value="${num}" 
-                                        ${responses[q.id] == num ? 'checked' : ''} 
-                                        class="hidden option-input" 
-                                        onchange="window.saveResponse(${q.id}, ${num})">
-                                    <label for="q${q.id}_${num}" class="option-btn flex items-center justify-center border-2 rounded-full cursor-pointer font-bold">${num}</label>
-                                </div>
-                            `).join('')}
-                        </div>
-                        <span class="label-text text-[9px] uppercase font-bold text-zinc-600 text-right leading-tight">Accurate</span>
-                    </div>
-                </div>
-            `;
-            const isLast = currentNumber === total;
-            html += `<button id="next-btn" onclick="window.${isLast ? 'submitFinal' : 'nextQuestion'}()" class="btn-zarego w-full text-white py-4 rounded-full font-bold shadow-lg uppercase tracking-widest text-sm transition-all active:scale-95" ${!responses[q.id] ? 'disabled' : ''}>${isLast ? 'Finish' : 'Next'}</button>`;
-            container.innerHTML = html;
-        }
-
-        window.saveResponse = function(id, val) { 
-            responses[id] = val; 
+        function enableNext() {
             document.getElementById('next-btn').disabled = false;
-        };
+            document.getElementById('next-btn').classList.remove('opacity-50');
+        }
 
-        window.nextQuestion = function() { currentIndex++; renderQuestion(); }
+        function nextQuestion() {
+            const val = document.querySelector('.option-input:checked').value;
+            responses[questions[currentIdx].id] = parseInt(val);
+            if(currentIdx < 49) { currentIdx++; showQuestion(); } else { submitTest(); }
+        }
 
-        window.submitFinal = async function() {
-            const btn = document.getElementById('next-btn');
-            btn.innerText = "SENDING..."; btn.disabled = true;
-            clearInterval(timerInterval);
-            const totalSeconds = Math.floor((new Date() - startTime) / 1000);
-            const tiempoFinal = Math.floor(totalSeconds / 60) + "m " + (totalSeconds % 60) + "s";
+        async function submitTest() {
+            document.getElementById('test-screen').innerHTML = "<div class='text-center py-20 animate-pulse text-zinc-500 uppercase tracking-widest font-bold'>Sending Results...</div>";
             const scores = { O: 0, C: 0, E: 0, A: 0, N: 0 };
-            const indivData = [];
+            const individuales = {};
             questions.forEach(q => {
-                let val = responses[q.id] || 3;
-                indivData.push({ pregunta: q.text, respuesta: val });
-                if (q.rev) val = 6 - val;
-                scores[q.cat] += val;
+                let v = responses[q.id];
+                individuales[q.id] = v;
+                if(q.rev) v = 6 - v;
+                scores[q.cat] += v;
             });
-            const payload = { token: userToken, nombre: userData.nombre, email: userData.email, O: (scores.O / 10).toFixed(2), C: (scores.C / 10).toFixed(2), E: (scores.E / 10).toFixed(2), A: (scores.A / 10).toFixed(2), N: (scores.N / 10).toFixed(2), tiempo: tiempoFinal, individuales: indivData };
-            try {
-                await fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
-                document.getElementById('form-container').innerHTML = `
-                <div class="text-center py-20">
-                    <div class="mb-6 inline-block p-4 rounded-full bg-zinc-800/50">
-                        <svg class="w-16 h-16 text-[#00D2FF]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
-                    </div>
-                    <h2 class="text-4xl font-black text-white mb-4 uppercase tracking-tighter">Done!</h2>
-                    <p class="text-zinc-400 text-lg px-4">Thank you for completing the assessment.</p>
-                </div>`;
-            } catch (e) { alert("Error sending."); btn.disabled = false; }
-        };
-
-        function initApp() {
-            document.getElementById('form-container').innerHTML = `
-                <div class="text-center mb-10 px-2">
-                    <h1 class="text-3xl sm:text-4xl font-black text-white uppercase tracking-tighter mb-6">
-                        Zarego <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#00D2FF] to-[#FF0055]">Personality</span> Test
-                    </h1>
-                    <div class="text-zinc-400 text-sm sm:text-base leading-relaxed space-y-4 max-w-md mx-auto text-left sm:text-center">
-                        <p>This assessment presents a series of statements about your typical behavior and feelings. For each one, please indicate to what extent it applies to you on a scale from <strong>1 (Inaccurate)</strong> to <strong>5 (Accurate)</strong>.</p>
-                        <p>There are no right or wrong answers—simply follow your first instinct and respond honestly. To ensure the best results, we recommend completing the entire assessment in a single session.</p>
-                        <p class="text-zinc-500 font-bold italic pt-2">Please enter your full name below to begin.</p>
-                    </div>
-                </div>
-                <div class="space-y-6">
-                    <input type="text" id="user-name" placeholder="E.g. Elon Musk" class="input-zarego w-full p-4 rounded-2xl text-sm transition-all">
-                </div>
-                <button onclick="window.validateAndStart()" class="btn-zarego w-full text-white py-5 rounded-2xl font-black mt-12 shadow-2xl uppercase tracking-widest transition-all active:scale-95">
-                    Start Assessment
-                </button>
-            `;
+            const diff = Math.floor((new Date() - startTime) / 1000);
+            const payload = {
+                nombre: document.getElementById('user-name').value,
+                email: document.getElementById('user-email').value,
+                O: (scores.O / 10).toFixed(2), C: (scores.C / 10).toFixed(2), E: (scores.E / 10).toFixed(2), A: (scores.A / 10).toFixed(2), N: (scores.N / 10).toFixed(2),
+                tiempo: `${Math.floor(diff/60)}m ${diff%60}s`,
+                individuales: individuales
+            };
+            await fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+            document.getElementById('test-screen').classList.add('hidden');
+            document.getElementById('final-screen').classList.remove('hidden');
         }
 
         function updateTimer() {
-            const now = new Date();
-            const diff = Math.floor((now - startTime) / 1000);
-            const m = Math.floor(diff / 60).toString().padStart(2, '0');
-            const s = (diff % 60).toString().padStart(2, '0');
-            const display = document.getElementById('timer-display');
-            if (display) display.innerText = m + ":" + s;
+            const d = Math.floor((new Date() - startTime) / 1000);
+            document.getElementById('timer').innerText = `${Math.floor(d/60).toString().padStart(2,'0')}:${(d%60).toString().padStart(2,'0')}`;
         }
-
-        validateToken();
     </script>
 </body>
 </html>
