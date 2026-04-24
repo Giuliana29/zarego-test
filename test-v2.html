@@ -6,99 +6,366 @@
     <title>Zarego Personality Test</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root { --zarego-bg: #0A0A0A; --zarego-cyan: #00D2FF; --zarego-magenta: #FF0055; }
-        body { background-color: var(--zarego-bg); color: white; font-family: sans-serif; overflow-x: hidden; }
-        
-        .option-btn {
-            width: 44px; height: 44px; min-width: 44px; aspect-ratio: 1/1;
-            display: flex; align-items: center; justify-content: center;
-            border: 2px solid #333; border-radius: 50%;
-            cursor: pointer; transition: all 0.2s; flex-shrink: 0;
+        :root {
+            --zarego-bg: #0A0A0A;
+            --zarego-cyan: #00D2FF;
+            --zarego-magenta: #FF0055;
         }
-        
+
+        body {
+            background-color: var(--zarego-bg);
+            color: white;
+            font-family: sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* ── Branding: gradiente en "Personality" ── */
+        .gradient-text {
+            background: linear-gradient(90deg, var(--zarego-cyan), var(--zarego-magenta));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* ── Botones de opción responsivos ── */
+        .option-btn {
+            /* Tamaño base para desktop */
+            width: 48px;
+            height: 48px;
+            min-width: 48px;
+            aspect-ratio: 1/1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid #333;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex-shrink: 0;
+            font-size: 1rem;
+            font-weight: 700;
+            user-select: none;
+            -webkit-user-select: none;
+            /* Área táctil mínima */
+            touch-action: manipulation;
+        }
+
+        /* En pantallas pequeñas, ajustar tamaño para que no desborden */
+        @media (max-width: 420px) {
+            .option-btn {
+                width: 44px;
+                height: 44px;
+                min-width: 44px;
+                font-size: 0.9rem;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .option-btn {
+                width: 38px;
+                height: 38px;
+                min-width: 38px;
+                font-size: 0.8rem;
+            }
+        }
+
         .option-input:checked + .option-btn {
             background: linear-gradient(90deg, var(--zarego-cyan), var(--zarego-magenta));
-            border-color: transparent; color: white; transform: scale(1.1);
+            border-color: transparent;
+            color: white;
+            transform: scale(1.1);
         }
-        .btn-zarego { background: linear-gradient(90deg, var(--zarego-cyan), var(--zarego-magenta)); }
-        .input-zarego { background: #1A1A1A; border: 1px solid #333; color: white; }
+
+        .btn-zarego {
+            background: linear-gradient(90deg, var(--zarego-cyan), var(--zarego-magenta));
+        }
+
+        .input-zarego {
+            background: #1A1A1A;
+            border: 1px solid #333;
+            color: white;
+        }
+
+        /* Contenedor de opciones: garantiza que no desborde */
+        .options-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: clamp(6px, 2vw, 12px);
+            flex-wrap: nowrap;
+        }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
 
-    <div id="app" class="max-w-xl w-full bg-[#141414] rounded-3xl p-8 border border-[#222] shadow-2xl">
-        
+    <div id="app" class="max-w-xl w-full bg-[#141414] rounded-3xl p-6 sm:p-8 border border-[#222] shadow-2xl">
+
+        <!-- ══════════════ START SCREEN ══════════════ -->
         <div id="start-screen">
             <h1 class="text-3xl font-black mb-6 uppercase tracking-tighter text-center">
-                Zarego <span class="text-[#00D2FF]">Personality</span> Test
+                Zarego <span class="gradient-text">Personality</span> Test
             </h1>
             <div class="text-zinc-400 text-sm mb-8 space-y-4 text-center">
                 <p>This assessment presents a series of statements about your typical behavior. Indicate to what extent it applies to you from 1 (Inaccurate) to 5 (Accurate).</p>
                 <p>There are no right or wrong answers—follow your first instinct. We recommend completing this in a single session.</p>
             </div>
-            <input type="text" id="user-name" placeholder="Full Name" class="input-zarego w-full p-4 rounded-xl mb-4 outline-none focus:border-[#00D2FF]">
-            <input type="email" id="user-email" placeholder="Email Address" class="input-zarego w-full p-4 rounded-xl mb-8 outline-none focus:border-[#00D2FF]">
-            <button onclick="startTest()" class="btn-zarego w-full py-4 rounded-xl font-bold uppercase tracking-widest active:scale-95 transition-transform">Start Assessment</button>
+            <input type="text"  id="user-name"  placeholder="Full Name"      class="input-zarego w-full p-4 rounded-xl mb-4 outline-none focus:border-[#00D2FF]">
+            <input type="email" id="user-email" placeholder="Email Address"  class="input-zarego w-full p-4 rounded-xl mb-8 outline-none focus:border-[#00D2FF]">
+            <button onclick="startTest()" class="btn-zarego w-full py-4 rounded-xl font-bold uppercase tracking-widest active:scale-95 transition-transform">
+                Start Assessment
+            </button>
         </div>
 
+        <!-- ══════════════ TEST SCREEN ══════════════ -->
         <div id="test-screen" class="hidden">
             <div class="flex justify-between text-[10px] text-zinc-500 mb-4 uppercase font-bold tracking-widest">
-                <span id="progress-text">1/50</span> <span id="timer">00:00</span>
+                <span id="progress-text">1/50</span>
+                <span id="timer">00:00</span>
             </div>
             <div class="w-full bg-zinc-800 h-1 rounded-full mb-10">
                 <div id="progress-bar" class="h-1 btn-zarego rounded-full transition-all" style="width: 0%"></div>
             </div>
+
             <p id="question-text" class="text-xl text-center mb-12 min-h-[80px] font-medium"></p>
-            
-            <div class="flex justify-between items-center mb-12 px-2">
-                <span class="text-[9px] text-zinc-600 uppercase font-bold">Inaccurate</span>
-                <div class="flex gap-2">
-                    <input type="radio" name="q" id="r1" value="1" class="hidden option-input" onchange="enableNext()"><label for="r1" class="option-btn font-bold">1</label>
-                    <input type="radio" name="q" id="r2" value="2" class="hidden option-input" onchange="enableNext()"><label for="r2" class="option-btn font-bold">2</label>
-                    <input type="radio" name="q" id="r3" value="3" class="hidden option-input" onchange="enableNext()"><label for="r3" class="option-btn font-bold">3</label>
-                    <input type="radio" name="q" id="r4" value="4" class="hidden option-input" onchange="enableNext()"><label for="r4" class="option-btn font-bold">4</label>
-                    <input type="radio" name="q" id="r5" value="5" class="hidden option-input" onchange="enableNext()"><label for="r5" class="option-btn font-bold">5</label>
+
+            <div class="flex justify-between items-center mb-12 px-1">
+                <span class="text-[9px] text-zinc-600 uppercase font-bold leading-tight text-left" style="max-width:40px">Inaccurate</span>
+
+                <div class="options-row">
+                    <input type="radio" name="q" id="r1" value="1" class="hidden option-input" onchange="enableNext()"><label for="r1" class="option-btn">1</label>
+                    <input type="radio" name="q" id="r2" value="2" class="hidden option-input" onchange="enableNext()"><label for="r2" class="option-btn">2</label>
+                    <input type="radio" name="q" id="r3" value="3" class="hidden option-input" onchange="enableNext()"><label for="r3" class="option-btn">3</label>
+                    <input type="radio" name="q" id="r4" value="4" class="hidden option-input" onchange="enableNext()"><label for="r4" class="option-btn">4</label>
+                    <input type="radio" name="q" id="r5" value="5" class="hidden option-input" onchange="enableNext()"><label for="r5" class="option-btn">5</label>
                 </div>
-                <span class="text-[9px] text-zinc-600 uppercase font-bold text-right">Accurate</span>
+
+                <span class="text-[9px] text-zinc-600 uppercase font-bold leading-tight text-right" style="max-width:40px">Accurate</span>
             </div>
-            <button id="next-btn" onclick="nextQuestion()" disabled class="btn-zarego w-full py-4 rounded-xl font-bold uppercase opacity-50 transition-all">Next</button>
+
+            <button id="next-btn" onclick="nextQuestion()" disabled
+                class="btn-zarego w-full py-4 rounded-xl font-bold uppercase opacity-50 transition-all active:scale-95">
+                Next
+            </button>
         </div>
 
+        <!-- ══════════════ FINAL SCREEN ══════════════ -->
         <div id="final-screen" class="hidden text-center py-10">
             <div class="text-[#00D2FF] mb-6 flex justify-center">
-                <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                </svg>
             </div>
             <h2 class="text-4xl font-black mb-4 uppercase text-[#00D2FF]">Done!</h2>
             <p class="text-zinc-400">Thank you. Your results have been recorded.</p>
         </div>
-    </div>
+
+    </div><!-- /#app -->
 
     <script>
+        /* ════════════════════════════════════════════════
+           CONFIGURACIÓN
+        ════════════════════════════════════════════════ */
         const API_URL = "https://script.google.com/macros/s/AKfycbyenKVTcMrv2BeHVpQ_BCt1MfWUvGGdgYfS6U52G20hR42UUc5ILV9jP88WLVqtq6x9DQ/exec";
 
-        const rawQuestions = [{id:1,text:"Have a rich vocabulary.",cat:"O",rev:false},{id:2,text:"Am full of ideas.",cat:"O",rev:false},{id:3,text:"Am quick to understand complex concepts.",cat:"O",rev:false},{id:4,text:"See beauty in things that others might not notice.",cat:"O",rev:false},{id:5,text:"Enjoy trying new and unfamiliar things.",cat:"O",rev:false},{id:6,text:"Am curious about many different topics.",cat:"O",rev:false},{id:7,text:"Prefer to stick with things that I know.",cat:"O",rev:true},{id:8,text:"Dislike changes.",cat:"O",rev:true},{id:9,text:"Avoid philosophical discussions.",cat:"O",rev:true},{id:10,text:"Do not have a good imagination.",cat:"O",rev:true},{id:11,text:"Pay attention to details.",cat:"C",rev:false},{id:12,text:"Follow a schedule.",cat:"C",rev:false},{id:13,text:"Plan tasks carefully before starting them.",cat:"C",rev:false},{id:14,text:"Finish what I start.",cat:"C",rev:false},{id:15,text:"Keep my promises.",cat:"C",rev:false},{id:16,text:"Work hard to achieve my goals.",cat:"C",rev:false},{id:17,text:"Often forget to put things back in their proper place.",cat:"C",rev:true},{id:18,text:"Find it difficult to stay focused on tasks.",cat:"C",rev:true},{id:19,text:"Start tasks right away.",cat:"C",rev:false},{id:20,text:"Act without thinking things through.",cat:"C",rev:true},{id:21,text:"Feel comfortable around people.",cat:"E",rev:false},{id:22,text:"Make friends easily.",cat:"E",rev:false},{id:23,text:"Start conversations.",cat:"E",rev:false},{id:24,text:"Am the life of the party.",cat:"E",rev:false},{id:25,text:"Enjoy being the center of attention.",cat:"E",rev:false},{id:26,text:"Feel energized when I am around others.",cat:"E",rev:false},{id:27,text:"Don’t talk a lot.",cat:"E",rev:true},{id:28,text:"Keep in the background.",cat:"E",rev:true},{id:29,text:"Prefer to spend time alone.",cat:"E",rev:true},{id:30,text:"Find it difficult to approach others.",cat:"E",rev:true},{id:31,text:"Sympathize with others’ feelings.",cat:"A",rev:false},{id:32,text:"Take time out for others.",cat:"A",rev:false},{id:33,text:"Trust others.",cat:"A",rev:false},{id:34,text:"Love to help others.",cat:"A",rev:false},{id:35,text:"Am considerate and kind to almost everyone.",cat:"A",rev:false},{id:36,text:"Am willing to compromise to avoid conflict.",cat:"A",rev:false},{id:37,text:"Am not interested in other people’s problems.",cat:"A",rev:true},{id:38,text:"Use flattery to get ahead.",cat:"A",rev:true},{id:39,text:"Believe that I am better than others.",cat:"A",rev:true},{id:40,text:"Can be rude to others.",cat:"A",rev:true},{id:41,text:"Get stressed out easily.",cat:"N",rev:false},{id:42,text:"Worry about things.",cat:"N",rev:false},{id:43,text:"Get irritated easily.",cat:"N",rev:false},{id:44,text:"Change my mood frequently.",cat:"N",rev:false},{id:45,text:"Feel insecure about myself.",cat:"N",rev:false},{id:46,text:"Often feel anxious or tense.",cat:"N",rev:false},{id:47,text:"Am relaxed most of the time.",cat:"N",rev:true},{id:48,text:"Remain calm under pressure.",cat:"N",rev:true},{id:49,text:"Am easily intimidated.",cat:"N",rev:false},{id:50,text:"Feel emotionally stable most of the time.",cat:"N",rev:true}];
-        
-        let shuffledQuestions = [];
-        let currentIdx = 0, responses = {}, startTime;
+        const LS_KEY = {
+            name:      "zpt_name",
+            email:     "zpt_email",
+            order:     "zpt_order",      // array de IDs en orden aleatorio
+            responses: "zpt_responses",  // objeto { id: valor }
+            idx:       "zpt_idx",        // número de pregunta actual
+            startTime: "zpt_startTime",  // timestamp de inicio
+        };
 
-        function startTest() {
-            const n = document.getElementById('user-name').value, e = document.getElementById('user-email').value;
-            if(n.length < 3 || !e.includes('@')) return alert("Please enter valid name and email.");
-            
-            // ALEATORIEDAD: Mezcla el array antes de empezar
-            shuffledQuestions = [...rawQuestions].sort(() => Math.random() - 0.5);
-            
-            document.getElementById('start-screen').classList.add('hidden');
-            document.getElementById('test-screen').classList.remove('hidden');
-            startTime = new Date(); setInterval(updateTimer, 1000); showQuestion();
+        /* ════════════════════════════════════════════════
+           PREGUNTAS ORIGINALES (IDs 1–50, nunca modificar)
+        ════════════════════════════════════════════════ */
+        const rawQuestions = [
+            {id:1,  text:"Have a rich vocabulary.",                                     cat:"O", rev:false},
+            {id:2,  text:"Am full of ideas.",                                           cat:"O", rev:false},
+            {id:3,  text:"Am quick to understand complex concepts.",                    cat:"O", rev:false},
+            {id:4,  text:"See beauty in things that others might not notice.",          cat:"O", rev:false},
+            {id:5,  text:"Enjoy trying new and unfamiliar things.",                     cat:"O", rev:false},
+            {id:6,  text:"Am curious about many different topics.",                     cat:"O", rev:false},
+            {id:7,  text:"Prefer to stick with things that I know.",                    cat:"O", rev:true},
+            {id:8,  text:"Dislike changes.",                                            cat:"O", rev:true},
+            {id:9,  text:"Avoid philosophical discussions.",                            cat:"O", rev:true},
+            {id:10, text:"Do not have a good imagination.",                             cat:"O", rev:true},
+            {id:11, text:"Pay attention to details.",                                   cat:"C", rev:false},
+            {id:12, text:"Follow a schedule.",                                          cat:"C", rev:false},
+            {id:13, text:"Plan tasks carefully before starting them.",                  cat:"C", rev:false},
+            {id:14, text:"Finish what I start.",                                        cat:"C", rev:false},
+            {id:15, text:"Keep my promises.",                                           cat:"C", rev:false},
+            {id:16, text:"Work hard to achieve my goals.",                              cat:"C", rev:false},
+            {id:17, text:"Often forget to put things back in their proper place.",      cat:"C", rev:true},
+            {id:18, text:"Find it difficult to stay focused on tasks.",                 cat:"C", rev:true},
+            {id:19, text:"Start tasks right away.",                                     cat:"C", rev:false},
+            {id:20, text:"Act without thinking things through.",                        cat:"C", rev:true},
+            {id:21, text:"Feel comfortable around people.",                             cat:"E", rev:false},
+            {id:22, text:"Make friends easily.",                                        cat:"E", rev:false},
+            {id:23, text:"Start conversations.",                                        cat:"E", rev:false},
+            {id:24, text:"Am the life of the party.",                                   cat:"E", rev:false},
+            {id:25, text:"Enjoy being the center of attention.",                        cat:"E", rev:false},
+            {id:26, text:"Feel energized when I am around others.",                     cat:"E", rev:false},
+            {id:27, text:"Don't talk a lot.",                                           cat:"E", rev:true},
+            {id:28, text:"Keep in the background.",                                     cat:"E", rev:true},
+            {id:29, text:"Prefer to spend time alone.",                                 cat:"E", rev:true},
+            {id:30, text:"Find it difficult to approach others.",                       cat:"E", rev:true},
+            {id:31, text:"Sympathize with others' feelings.",                           cat:"A", rev:false},
+            {id:32, text:"Take time out for others.",                                   cat:"A", rev:false},
+            {id:33, text:"Trust others.",                                               cat:"A", rev:false},
+            {id:34, text:"Love to help others.",                                        cat:"A", rev:false},
+            {id:35, text:"Am considerate and kind to almost everyone.",                 cat:"A", rev:false},
+            {id:36, text:"Am willing to compromise to avoid conflict.",                 cat:"A", rev:false},
+            {id:37, text:"Am not interested in other people's problems.",               cat:"A", rev:true},
+            {id:38, text:"Use flattery to get ahead.",                                  cat:"A", rev:true},
+            {id:39, text:"Believe that I am better than others.",                       cat:"A", rev:true},
+            {id:40, text:"Can be rude to others.",                                      cat:"A", rev:true},
+            {id:41, text:"Get stressed out easily.",                                    cat:"N", rev:false},
+            {id:42, text:"Worry about things.",                                         cat:"N", rev:false},
+            {id:43, text:"Get irritated easily.",                                       cat:"N", rev:false},
+            {id:44, text:"Change my mood frequently.",                                  cat:"N", rev:false},
+            {id:45, text:"Feel insecure about myself.",                                 cat:"N", rev:false},
+            {id:46, text:"Often feel anxious or tense.",                                cat:"N", rev:false},
+            {id:47, text:"Am relaxed most of the time.",                                cat:"N", rev:true},
+            {id:48, text:"Remain calm under pressure.",                                 cat:"N", rev:true},
+            {id:49, text:"Am easily intimidated.",                                      cat:"N", rev:false},
+            {id:50, text:"Feel emotionally stable most of the time.",                   cat:"N", rev:true},
+        ];
+
+        /* ════════════════════════════════════════════════
+           ESTADO GLOBAL
+        ════════════════════════════════════════════════ */
+        let shuffledQuestions = [];
+        let currentIdx  = 0;
+        let responses   = {};
+        let startTime   = null;
+        let timerInterval = null;
+        let testInProgress = false;   // controla el onbeforeunload
+
+        /* ════════════════════════════════════════════════
+           PREVENCIÓN DE CIERRE / REFRESCO
+        ════════════════════════════════════════════════ */
+        window.onbeforeunload = function(e) {
+            if (testInProgress) {
+                e.preventDefault();
+                e.returnValue = ""; // Muestra el diálogo nativo del navegador
+                return "";
+            }
+        };
+
+        /* ════════════════════════════════════════════════
+           HELPERS DE LOCALSTORAGE
+        ════════════════════════════════════════════════ */
+        function saveState() {
+            localStorage.setItem(LS_KEY.idx,       JSON.stringify(currentIdx));
+            localStorage.setItem(LS_KEY.responses, JSON.stringify(responses));
         }
 
+        function loadState() {
+            try {
+                const savedName  = localStorage.getItem(LS_KEY.name);
+                const savedEmail = localStorage.getItem(LS_KEY.email);
+                const savedOrder = localStorage.getItem(LS_KEY.order);
+                const savedResp  = localStorage.getItem(LS_KEY.responses);
+                const savedIdx   = localStorage.getItem(LS_KEY.idx);
+                const savedTime  = localStorage.getItem(LS_KEY.startTime);
+
+                // Si existe una sesión guardada con todos los datos necesarios, restaurarla
+                if (savedName && savedEmail && savedOrder && savedResp !== null && savedIdx !== null) {
+                    document.getElementById('user-name').value  = savedName;
+                    document.getElementById('user-email').value = savedEmail;
+
+                    shuffledQuestions = JSON.parse(savedOrder).map(id => rawQuestions.find(q => q.id === id));
+                    responses  = JSON.parse(savedResp);
+                    currentIdx = JSON.parse(savedIdx);
+                    startTime  = savedTime ? new Date(JSON.parse(savedTime)) : new Date();
+
+                    return true; // sesión recuperada
+                }
+            } catch(err) {
+                // Si hay cualquier error, ignorar y empezar desde cero
+                clearStorage();
+            }
+            return false;
+        }
+
+        function clearStorage() {
+            Object.values(LS_KEY).forEach(k => localStorage.removeItem(k));
+        }
+
+        /* ════════════════════════════════════════════════
+           INICIO
+        ════════════════════════════════════════════════ */
+        function startTest() {
+            const name  = document.getElementById('user-name').value.trim();
+            const email = document.getElementById('user-email').value.trim();
+            if (name.length < 3 || !email.includes('@')) {
+                return alert("Please enter a valid name and email.");
+            }
+
+            // ¿Hay una sesión guardada con los mismos datos?
+            const savedName  = localStorage.getItem(LS_KEY.name);
+            const savedEmail = localStorage.getItem(LS_KEY.email);
+            const savedOrder = localStorage.getItem(LS_KEY.order);
+
+            if (savedName === name && savedEmail === email && savedOrder) {
+                // Restaurar sesión existente
+                const restored = loadState();
+                if (restored) {
+                    beginTestUI();
+                    return;
+                }
+            }
+
+            // Nueva sesión: generar orden aleatorio y guardarlo
+            clearStorage();
+            shuffledQuestions = [...rawQuestions].sort(() => Math.random() - 0.5);
+            currentIdx  = 0;
+            responses   = {};
+            startTime   = new Date();
+
+            localStorage.setItem(LS_KEY.name,      name);
+            localStorage.setItem(LS_KEY.email,     email);
+            localStorage.setItem(LS_KEY.order,     JSON.stringify(shuffledQuestions.map(q => q.id)));
+            localStorage.setItem(LS_KEY.startTime, JSON.stringify(startTime.toISOString()));
+            saveState();
+
+            beginTestUI();
+        }
+
+        function beginTestUI() {
+            testInProgress = true;
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('test-screen').classList.remove('hidden');
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(updateTimer, 1000);
+            showQuestion();
+        }
+
+        /* ════════════════════════════════════════════════
+           FLUJO DEL TEST
+        ════════════════════════════════════════════════ */
         function showQuestion() {
             const q = shuffledQuestions[currentIdx];
             document.getElementById('question-text').innerText = q.text;
             document.getElementById('progress-text').innerText = (currentIdx + 1) + "/50";
             document.getElementById('progress-bar').style.width = ((currentIdx + 1) / 50 * 100) + "%";
-            document.querySelectorAll('.option-input').forEach(i => i.checked = false);
+
+            // Limpiar selección anterior y restaurar si ya fue respondida
+            document.querySelectorAll('.option-input').forEach(input => {
+                input.checked = false;
+            });
+
+            // Si la pregunta ya tiene respuesta guardada, pre-seleccionarla
+            if (responses[q.id]) {
+                const saved = document.getElementById('r' + responses[q.id]);
+                if (saved) {
+                    saved.checked = true;
+                    enableNext();
+                    return;
+                }
+            }
+
             document.getElementById('next-btn').disabled = true;
             document.getElementById('next-btn').classList.add('opacity-50');
         }
@@ -110,40 +377,93 @@
 
         function nextQuestion() {
             const selected = document.querySelector('.option-input:checked');
-            if(!selected) return;
-            // Guardamos la respuesta asociada al ID de la pregunta original
+            if (!selected) return;
+
+            // Guardar respuesta con el ID original de la pregunta
             responses[shuffledQuestions[currentIdx].id] = parseInt(selected.value);
-            if(currentIdx < 49) { currentIdx++; showQuestion(); } else { submitTest(); }
+            saveState(); // Persistir progreso inmediatamente
+
+            if (currentIdx < 49) {
+                currentIdx++;
+                saveState(); // Actualizar también el índice
+                showQuestion();
+            } else {
+                submitTest();
+            }
         }
 
+        /* ════════════════════════════════════════════════
+           ENVÍO DE RESULTADOS
+           ⚠ No modificar el payload — estructura requerida
+             por el Google Apps Script
+        ════════════════════════════════════════════════ */
         async function submitTest() {
-            document.getElementById('test-screen').innerHTML = "<div class='text-center py-20 animate-pulse text-zinc-500 uppercase tracking-widest font-bold'>Sending Results...</div>";
+            // Desactivar la advertencia de cierre antes de enviar
+            testInProgress = false;
+
+            document.getElementById('test-screen').innerHTML =
+                "<div class='text-center py-20 animate-pulse text-zinc-500 uppercase tracking-widest font-bold'>Sending Results...</div>";
+
             const scores = { O: 0, C: 0, E: 0, A: 0, N: 0 };
-            
-            // Procesar puntajes usando el orden original para el Excel
+
+            // Procesar puntajes en el orden original (rawQuestions) para el Excel
             rawQuestions.forEach(q => {
                 let v = responses[q.id];
-                if(q.rev) v = 6 - v;
+                if (q.rev) v = 6 - v;
                 scores[q.cat] += v;
             });
 
             const diff = Math.floor((new Date() - startTime) / 1000);
+
+            // ⚠ Estructura del payload: no cambiar
             const payload = {
-                nombre: document.getElementById('user-name').value,
-                email: document.getElementById('user-email').value,
-                O: (scores.O / 10).toFixed(2), C: (scores.C / 10).toFixed(2), E: (scores.E / 10).toFixed(2), A: (scores.A / 10).toFixed(2), N: (scores.N / 10).toFixed(2),
-                tiempo: Math.floor(diff/60) + "m " + (diff%60) + "s",
-                individuales: responses 
+                nombre:      document.getElementById('user-name').value,
+                email:       document.getElementById('user-email').value,
+                O:           (scores.O / 10).toFixed(2),
+                C:           (scores.C / 10).toFixed(2),
+                E:           (scores.E / 10).toFixed(2),
+                A:           (scores.A / 10).toFixed(2),
+                N:           (scores.N / 10).toFixed(2),
+                tiempo:      Math.floor(diff / 60) + "m " + (diff % 60) + "s",
+                individuales: responses   // { [id]: valor } — IDs originales 1–50
             };
+
             await fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+
+            // Limpiar localStorage tras envío exitoso
+            clearStorage();
+            if (timerInterval) clearInterval(timerInterval);
+
             document.getElementById('test-screen').classList.add('hidden');
             document.getElementById('final-screen').classList.remove('hidden');
         }
 
+        /* ════════════════════════════════════════════════
+           TIMER
+        ════════════════════════════════════════════════ */
         function updateTimer() {
+            if (!startTime) return;
             const d = Math.floor((new Date() - startTime) / 1000);
-            document.getElementById('timer').innerText = Math.floor(d/60).toString().padStart(2,'0') + ":" + (d%60).toString().padStart(2,'0');
+            document.getElementById('timer').innerText =
+                Math.floor(d / 60).toString().padStart(2, '0') + ":" +
+                (d % 60).toString().padStart(2, '0');
         }
+
+        /* ════════════════════════════════════════════════
+           AL CARGAR LA PÁGINA:
+           Restaurar nombre/email si existe sesión previa
+        ════════════════════════════════════════════════ */
+        (function initPage() {
+            const savedName  = localStorage.getItem(LS_KEY.name);
+            const savedEmail = localStorage.getItem(LS_KEY.email);
+            const savedOrder = localStorage.getItem(LS_KEY.order);
+
+            if (savedName && savedEmail && savedOrder) {
+                // Pre-rellenar los campos para que el usuario vea que hay una sesión guardada
+                document.getElementById('user-name').value  = savedName;
+                document.getElementById('user-email').value = savedEmail;
+            }
+        })();
     </script>
 </body>
 </html>
