@@ -467,11 +467,17 @@
         function freezeTimer() {
             if (timerInterval && startTime) {
                 elapsedSeconds += Math.floor((new Date() - startTime) / 1000);
+                startTime = null; // evita doble conteo si el evento se dispara más de una vez
                 localStorage.setItem(LS_KEY.elapsed, JSON.stringify(elapsedSeconds));
             }
         }
         document.addEventListener('visibilitychange', function() {
-            if (document.visibilityState === 'hidden') freezeTimer();
+            if (document.visibilityState === 'hidden') {
+                freezeTimer();
+            } else if (document.visibilityState === 'visible' && timerInterval) {
+                // Al volver, reanudar desde ahora
+                startTime = new Date();
+            }
         });
         window.addEventListener('pagehide', freezeTimer);
     </script>
