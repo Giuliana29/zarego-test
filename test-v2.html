@@ -277,7 +277,7 @@
                     responses      = JSON.parse(savedResp);
                     currentIdx     = JSON.parse(savedIdx);
                     elapsedSeconds = savedElapsed ? JSON.parse(savedElapsed) : 0;
-                    startTime      = new Date(); // marca de reanudación
+                    // startTime se setea en beginTestUI al momento exacto de reanudar
 
                     return true;
                 }
@@ -325,7 +325,6 @@
             currentIdx     = 0;
             responses      = {};
             elapsedSeconds = 0;
-            startTime      = new Date();
 
             localStorage.setItem(LS_KEY.name,  name);
             localStorage.setItem(LS_KEY.email, email);
@@ -339,6 +338,7 @@
             document.getElementById('start-screen').classList.add('hidden');
             document.getElementById('test-screen').classList.remove('hidden');
             if (timerInterval) clearInterval(timerInterval);
+            startTime = new Date(); // marca exacta de inicio/reanudación
             timerInterval = setInterval(updateTimer, 1000);
             showQuestion();
         }
