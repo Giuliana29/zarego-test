@@ -181,6 +181,7 @@
             responses: "zpt_responses",  // objeto { id: valor }
             idx:       "zpt_idx",        // número de pregunta actual
             startTime: "zpt_startTime",  // timestamp de inicio
+            elapsed:   "zpt_elapsed",    // segundos acumulados (para pausar al salir)
         };
 
         /* ════════════════════════════════════════════════
@@ -243,10 +244,11 @@
            ESTADO GLOBAL
         ════════════════════════════════════════════════ */
         let shuffledQuestions = [];
-        let currentIdx  = 0;
-        let responses   = {};
-        let startTime   = null;
+        let currentIdx    = 0;
+        let responses     = {};
+        let startTime     = null;
         let timerInterval = null;
+        let elapsedSeconds = 0;  // segundos acumulados (se pausa al salir)
 
         /* ════════════════════════════════════════════════
            HELPERS DE LOCALSTORAGE
@@ -254,16 +256,17 @@
         function saveState() {
             localStorage.setItem(LS_KEY.idx,       JSON.stringify(currentIdx));
             localStorage.setItem(LS_KEY.responses, JSON.stringify(responses));
+            localStorage.setItem(LS_KEY.elapsed,   JSON.stringify(elapsedSeconds));
         }
 
         function loadState() {
             try {
-                const savedOrder = localStorage.getItem(LS_KEY.order);
-                const savedResp  = localStorage.getItem(LS_KEY.responses);
-                const savedIdx   = localStorage.getItem(LS_KEY.idx);
-                const savedTime  = localStorage.getItem(LS_KEY.startTime);
-                const savedName  = localStorage.getItem(LS_KEY.name);
-                const savedEmail = localStorage.getItem(LS_KEY.email);
+                const savedOrder   = localStorage.getItem(LS_KEY.order);
+                const savedResp    = localStorage.getItem(LS_KEY.responses);
+                const savedIdx     = localStorage.getItem(LS_KEY.idx);
+                const savedElapsed = localStorage.getItem(LS_KEY.elapsed);
+                const savedName    = localStorage.getItem(LS_KEY.name);
+                const savedEmail   = localStorage.getItem(LS_KEY.email);
 
                 if (savedOrder && savedResp !== null && savedIdx !== null) {
                     // Pre-rellenar campos si no los tiene ya el usuario
@@ -271,9 +274,10 @@
                     if (savedEmail) document.getElementById('user-email').value = savedEmail;
 
                     shuffledQuestions = JSON.parse(savedOrder).map(id => rawQuestions.find(q => q.id === id));
-                    responses  = JSON.parse(savedResp);
-                    currentIdx = JSON.parse(savedIdx);
-                    startTime  = savedTime ? new Date(JSON.parse(savedTime)) : new Date();
+                    responses      = JSON.parse(savedResp);
+                    currentIdx     = JSON.parse(savedIdx);
+                    elapsedSeconds = savedElapsed ? JSON.parse(savedElapsed) : 0;
+                    startTime      = new Date(); // marca de reanudación
 
                     return true;
                 }
@@ -318,14 +322,14 @@
             // Nueva sesión: generar orden aleatorio y guardarlo
             clearStorage();
             shuffledQuestions = [...rawQuestions].sort(() => Math.random() - 0.5);
-            currentIdx  = 0;
-            responses   = {};
-            startTime   = new Date();
+            currentIdx     = 0;
+            responses      = {};
+            elapsedSeconds = 0;
+            startTime      = new Date();
 
-            localStorage.setItem(LS_KEY.name,      name);
-            localStorage.setItem(LS_KEY.email,     email);
-            localStorage.setItem(LS_KEY.order,     JSON.stringify(shuffledQuestions.map(q => q.id)));
-            localStorage.setItem(LS_KEY.startTime, JSON.stringify(startTime.toISOString()));
+            localStorage.setItem(LS_KEY.name,  name);
+            localStorage.setItem(LS_KEY.email, email);
+            localStorage.setItem(LS_KEY.order, JSON.stringify(shuffledQuestions.map(q => q.id)));
             saveState();
 
             beginTestUI();
@@ -407,7 +411,7 @@
                 scores[q.cat] += v;
             });
 
-            const diff = Math.floor((new Date() - startTime) / 1000);
+            const diff = elapsedSeconds + Math.floor((new Date() - startTime) / 1000);
 
             // ⚠ Estructura del payload: no cambiar
             const payload = {
@@ -437,7 +441,7 @@
         ════════════════════════════════════════════════ */
         function updateTimer() {
             if (!startTime) return;
-            const d = Math.floor((new Date() - startTime) / 1000);
+            const d = elapsedSeconds + Math.floor((new Date() - startTime) / 1000);
             document.getElementById('timer').innerText =
                 Math.floor(d / 60).toString().padStart(2, '0') + ":" +
                 (d % 60).toString().padStart(2, '0');
@@ -458,6 +462,18 @@
                 document.getElementById('user-email').value = savedEmail;
             }
         })();
+
+        // Pausar el timer al salir/refrescar: guardar segundos acumulados hasta este momento
+        function freezeTimer() {
+            if (timerInterval && startTime) {
+                elapsedSeconds += Math.floor((new Date() - startTime) / 1000);
+                localStorage.setItem(LS_KEY.elapsed, JSON.stringify(elapsedSeconds));
+            }
+        }
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'hidden') freezeTimer();
+        });
+        window.addEventListener('pagehide', freezeTimer);
     </script>
 </body>
 </html>
