@@ -1,0 +1,656 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zarego Personality Questionnaire</title>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800;900&family=Barlow+Condensed:wght@700;800;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --zarego-cyan: #00D2FF;
+            --zarego-magenta: #FF0055;
+            --zarego-bg: #F5F6FA;
+            --zarego-surface: #FFFFFF;
+            --zarego-border: #E2E5EF;
+            --zarego-text: #1A1D2E;
+            --zarego-muted: #7B7F96;
+            --zarego-subtle: #A0A4BB;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            background-color: var(--zarego-bg);
+            color: var(--zarego-text);
+            font-family: 'Barlow', sans-serif;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* ── Background decorative circles (from Vie theme) ── */
+        .circle-bg {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .gradient-circle {
+            position: absolute;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(0,210,255,0.06) 0%, transparent 70%);
+            top: -200px;
+            right: -150px;
+        }
+        .gradient-circle.two {
+            background: radial-gradient(circle, rgba(255,0,85,0.05) 0%, transparent 70%);
+            bottom: -200px;
+            left: -150px;
+            top: auto;
+            right: auto;
+        }
+
+        /* ── Gradient accent text ── */
+        .gradient-text {
+            background: linear-gradient(90deg, var(--zarego-cyan), var(--zarego-magenta));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* ── Main card ── */
+        #app {
+            background: var(--zarego-surface);
+            border: 1px solid var(--zarego-border);
+            box-shadow: 0 8px 40px rgba(26,29,46,0.08), 0 2px 8px rgba(26,29,46,0.04);
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ── Option buttons ── */
+        .option-btn {
+            width: clamp(42px, 11vw, 52px);
+            height: clamp(42px, 11vw, 52px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--zarego-border);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+            font-size: clamp(0.85rem, 3vw, 1rem);
+            font-weight: 700;
+            color: var(--zarego-muted);
+            background: #F9FAFB;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+
+        .option-btn:hover {
+            border-color: var(--zarego-cyan);
+            color: var(--zarego-text);
+            background: #F0FDFF;
+        }
+
+        .option-input:checked + .option-btn {
+            background: linear-gradient(135deg, #00D2FF 0%, #9B4DFF 50%, #FF0055 100%);
+            border-color: transparent;
+            color: white;
+            transform: scale(1.1);
+            box-shadow: 0 4px 20px rgba(0,210,255,0.35), 0 2px 8px rgba(255,0,85,0.2);
+        }
+
+        /* ── CTA Button ── */
+        .btn-zarego {
+            background: linear-gradient(90deg, var(--zarego-cyan), var(--zarego-magenta));
+            color: white;
+            font-family: 'Barlow Condensed', sans-serif;
+            letter-spacing: 0.12em;
+            font-weight: 800;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 20px rgba(0,210,255,0.25);
+        }
+        .btn-zarego:hover {
+            box-shadow: 0 8px 30px rgba(0,210,255,0.4);
+            transform: translateY(-1px);
+        }
+        .btn-zarego:active {
+            transform: scale(0.97) translateY(0);
+        }
+        .btn-zarego:disabled {
+            opacity: 0.45;
+            box-shadow: none;
+            transform: none;
+        }
+
+        /* ── Inputs ── */
+        .input-zarego {
+            background: #F9FAFB;
+            border: 1.5px solid var(--zarego-border);
+            color: var(--zarego-text);
+            font-family: 'Barlow', sans-serif;
+            font-size: 0.95rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .input-zarego::placeholder {
+            color: var(--zarego-subtle);
+        }
+        .input-zarego:focus {
+            outline: none;
+            border-color: var(--zarego-cyan);
+            box-shadow: 0 0 0 3px rgba(0,210,255,0.12);
+            background: white;
+        }
+
+        /* ── Progress bar track ── */
+        .progress-track {
+            background: #EDF0F7;
+        }
+
+        /* ── Options row ── */
+        .options-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: clamp(8px, 2.5vw, 14px);
+            flex-wrap: nowrap;
+            width: 100%;
+        }
+
+        /* ── Rating block ── */
+        .rating-block {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+        }
+
+        /* ── Rating labels ── */
+        .rating-labels {
+            display: flex;
+            justify-content: space-between;
+            width: calc(5 * clamp(42px, 11vw, 52px) + 4 * clamp(8px, 2.5vw, 14px));
+            max-width: 100%;
+        }
+
+        .rating-labels span {
+            font-size: 0.65rem;
+            color: var(--zarego-subtle);
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        /* ── Section eyebrow label ── */
+        .eyebrow {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 0.7rem;
+            font-weight: 800;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--zarego-muted);
+        }
+
+        /* ── Divider ── */
+        .divider {
+            height: 1px;
+            background: var(--zarego-border);
+            width: 100%;
+        }
+
+        /* ── Logo mark top ── */
+        .logo-mark {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 1.5rem;
+        }
+        .logo-mark-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--zarego-cyan), var(--zarego-magenta));
+        }
+        .logo-mark-text {
+            font-family: 'Barlow Condensed', sans-serif;
+            font-size: 0.7rem;
+            font-weight: 800;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--zarego-muted);
+        }
+
+        /* ── Sending animation ── */
+        @keyframes spin-slow {
+            to { transform: rotate(360deg); }
+        }
+        .animate-spin-slow {
+            animation: spin-slow 2s linear infinite;
+        }
+
+        /* ── Final screen checkmark ── */
+        .check-circle {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(0,210,255,0.1), rgba(255,0,85,0.08));
+            border: 2px solid var(--zarego-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+        }
+
+        @media (max-width: 640px) {
+            #app { border-radius: 1.5rem !important; }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <!-- Decorative background -->
+    <div class="circle-bg">
+        <div class="gradient-circle"></div>
+        <div class="gradient-circle two"></div>
+    </div>
+
+    <div id="app" class="max-w-xl w-full rounded-3xl p-6 sm:p-10">
+
+        <!-- ══════════════ START SCREEN ══════════════ -->
+        <div id="start-screen">
+
+            <div class="logo-mark justify-center">
+                <div class="logo-mark-dot"></div>
+                <span class="logo-mark-text">Zarego · Assessment</span>
+                <div class="logo-mark-dot"></div>
+            </div>
+
+            <h1 class="text-4xl sm:text-5xl font-black mb-2 uppercase tracking-tight text-center leading-tight" style="font-family: 'Barlow Condensed', sans-serif;">
+                Personality <span class="gradient-text">Questionnaire</span>
+            </h1>
+
+            <div class="divider my-6"></div>
+
+            <div class="space-y-3 mb-8 text-center" style="color: var(--zarego-muted); font-size: 0.92rem; line-height: 1.7;">
+                <p>This assessment explores your typical behaviors through a series of short statements. Rate them from 1 to 5 based on how well they describe you.</p>
+                <p>Please keep in mind that this is not a decisive test; it's simply a way for us to get to know you better. Trust your gut and enjoy the process! It will only take a few minutes, and we recommend completing it in a single session.</p>
+            </div>
+
+            <div class="space-y-3 mb-8">
+                <input type="text"  id="user-name"  placeholder="Full Name"
+                    class="input-zarego w-full p-4 rounded-xl">
+                <input type="email" id="user-email" placeholder="Email Address"
+                    class="input-zarego w-full p-4 rounded-xl">
+            </div>
+
+            <button onclick="startTest()"
+                class="btn-zarego w-full py-4 rounded-xl text-sm uppercase">
+                Start Assessment
+            </button>
+        </div>
+
+        <!-- ══════════════ TEST SCREEN ══════════════ -->
+        <div id="test-screen" class="hidden">
+
+            <div class="flex justify-between items-center mb-3">
+                <span id="progress-text" class="eyebrow" style="color: var(--zarego-cyan);">1/50</span>
+                <span id="timer" class="eyebrow">00:00</span>
+            </div>
+
+            <div class="progress-track w-full h-1 rounded-full mb-10">
+                <div id="progress-bar" class="h-1 btn-zarego rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+
+            <p id="question-text" class="text-xl text-center mb-8 min-h-[80px] font-semibold leading-relaxed" style="color: var(--zarego-text);"></p>
+
+            <div class="rating-block mb-10">
+                <div class="options-row">
+                    <input type="radio" name="q" id="r1" value="1" class="hidden option-input" onchange="enableNext()"><label for="r1" class="option-btn">1</label>
+                    <input type="radio" name="q" id="r2" value="2" class="hidden option-input" onchange="enableNext()"><label for="r2" class="option-btn">2</label>
+                    <input type="radio" name="q" id="r3" value="3" class="hidden option-input" onchange="enableNext()"><label for="r3" class="option-btn">3</label>
+                    <input type="radio" name="q" id="r4" value="4" class="hidden option-input" onchange="enableNext()"><label for="r4" class="option-btn">4</label>
+                    <input type="radio" name="q" id="r5" value="5" class="hidden option-input" onchange="enableNext()"><label for="r5" class="option-btn">5</label>
+                </div>
+                <div class="rating-labels">
+                    <span>Inaccurate</span>
+                    <span>Accurate</span>
+                </div>
+            </div>
+
+            <button id="next-btn" onclick="nextQuestion()" disabled
+                class="btn-zarego w-full py-4 rounded-xl text-sm uppercase">
+                Next
+            </button>
+        </div>
+
+        <!-- ══════════════ FINAL SCREEN ══════════════ -->
+        <div id="final-screen" class="hidden text-center py-10">
+            <div class="check-circle">
+                <svg width="32" height="32" fill="none" stroke="url(#grad)" viewBox="0 0 24 24">
+                    <defs>
+                        <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#00D2FF"/>
+                            <stop offset="100%" stop-color="#FF0055"/>
+                        </linearGradient>
+                    </defs>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                </svg>
+            </div>
+            <div class="eyebrow mb-3">Assessment Complete</div>
+            <h2 class="text-5xl font-black uppercase mb-4 gradient-text" style="font-family: 'Barlow Condensed', sans-serif;">Thank You!</h2>
+            <p style="color: var(--zarego-muted); font-size: 0.95rem;">Your answers have been successfully recorded.</p>
+        </div>
+
+    </div><!-- /#app -->
+
+    <script>
+        /* ════════════════════════════════════════════════
+           CONFIGURACIÓN
+        ════════════════════════════════════════════════ */
+        const API_URL = "https://script.google.com/macros/s/AKfycbyenKVTcMrv2BeHVpQ_BCt1MfWUvGGdgYfS6U52G20hR42UUc5ILV9jP88WLVqtq6x9DQ/exec";
+
+        const LS_KEY = {
+            name:      "zpt_name",
+            email:     "zpt_email",
+            order:     "zpt_order",
+            responses: "zpt_responses",
+            idx:       "zpt_idx",
+            startTime: "zpt_startTime",
+            elapsed:   "zpt_elapsed",
+        };
+
+        /* ════════════════════════════════════════════════
+           PREGUNTAS ORIGINALES (IDs 1–50, nunca modificar)
+        ════════════════════════════════════════════════ */
+        const rawQuestions = [
+            {id:1,  text:"Have a rich vocabulary.",                                     cat:"O", rev:false},
+            {id:2,  text:"Am full of ideas.",                                           cat:"O", rev:false},
+            {id:3,  text:"Am quick to understand complex concepts.",                    cat:"O", rev:false},
+            {id:4,  text:"See beauty in things that others might not notice.",          cat:"O", rev:false},
+            {id:5,  text:"Enjoy trying new and unfamiliar things.",                     cat:"O", rev:false},
+            {id:6,  text:"Am curious about many different topics.",                     cat:"O", rev:false},
+            {id:7,  text:"Prefer to stick with things that I know.",                    cat:"O", rev:true},
+            {id:8,  text:"Dislike changes.",                                            cat:"O", rev:true},
+            {id:9,  text:"Avoid philosophical discussions.",                            cat:"O", rev:true},
+            {id:10, text:"Do not have a good imagination.",                             cat:"O", rev:true},
+            {id:11, text:"Pay attention to details.",                                   cat:"C", rev:false},
+            {id:12, text:"Follow a schedule.",                                          cat:"C", rev:false},
+            {id:13, text:"Plan tasks carefully before starting them.",                  cat:"C", rev:false},
+            {id:14, text:"Finish what I start.",                                        cat:"C", rev:false},
+            {id:15, text:"Keep my promises.",                                           cat:"C", rev:false},
+            {id:16, text:"Work hard to achieve my goals.",                              cat:"C", rev:false},
+            {id:17, text:"Often forget to put things back in their proper place.",      cat:"C", rev:true},
+            {id:18, text:"Find it difficult to stay focused on tasks.",                 cat:"C", rev:true},
+            {id:19, text:"Start tasks right away.",                                     cat:"C", rev:false},
+            {id:20, text:"Act without thinking things through.",                        cat:"C", rev:true},
+            {id:21, text:"Feel comfortable around people.",                             cat:"E", rev:false},
+            {id:22, text:"Make friends easily.",                                        cat:"E", rev:false},
+            {id:23, text:"Start conversations.",                                        cat:"E", rev:false},
+            {id:24, text:"Am the life of the party.",                                   cat:"E", rev:false},
+            {id:25, text:"Enjoy being the center of attention.",                        cat:"E", rev:false},
+            {id:26, text:"Feel energized when I am around others.",                     cat:"E", rev:false},
+            {id:27, text:"Don't talk a lot.",                                           cat:"E", rev:true},
+            {id:28, text:"Keep in the background.",                                     cat:"E", rev:true},
+            {id:29, text:"Prefer to spend time alone.",                                 cat:"E", rev:true},
+            {id:30, text:"Find it difficult to approach others.",                       cat:"E", rev:true},
+            {id:31, text:"Sympathize with others' feelings.",                           cat:"A", rev:false},
+            {id:32, text:"Take time out for others.",                                   cat:"A", rev:false},
+            {id:33, text:"Trust others.",                                               cat:"A", rev:false},
+            {id:34, text:"Love to help others.",                                        cat:"A", rev:false},
+            {id:35, text:"Am considerate and kind to almost everyone.",                 cat:"A", rev:false},
+            {id:36, text:"Am willing to compromise to avoid conflict.",                 cat:"A", rev:false},
+            {id:37, text:"Am not interested in other people's problems.",               cat:"A", rev:true},
+            {id:38, text:"Use flattery to get ahead.",                                  cat:"A", rev:true},
+            {id:39, text:"Believe that I am better than others.",                       cat:"A", rev:true},
+            {id:40, text:"Can be rude to others.",                                      cat:"A", rev:true},
+            {id:41, text:"Get stressed out easily.",                                    cat:"N", rev:false},
+            {id:42, text:"Worry about things.",                                         cat:"N", rev:false},
+            {id:43, text:"Get irritated easily.",                                       cat:"N", rev:false},
+            {id:44, text:"Change my mood frequently.",                                  cat:"N", rev:false},
+            {id:45, text:"Feel insecure about myself.",                                 cat:"N", rev:false},
+            {id:46, text:"Often feel anxious or tense.",                                cat:"N", rev:false},
+            {id:47, text:"Am relaxed most of the time.",                                cat:"N", rev:true},
+            {id:48, text:"Remain calm under pressure.",                                 cat:"N", rev:true},
+            {id:49, text:"Am easily intimidated.",                                      cat:"N", rev:false},
+            {id:50, text:"Feel emotionally stable most of the time.",                   cat:"N", rev:true},
+        ];
+
+        /* ════════════════════════════════════════════════
+           ESTADO GLOBAL
+        ════════════════════════════════════════════════ */
+        let shuffledQuestions = [];
+        let currentIdx    = 0;
+        let responses     = {};
+        let startTime     = null;
+        let timerInterval = null;
+        let elapsedSeconds = 0;
+
+        /* ════════════════════════════════════════════════
+           HELPERS DE LOCALSTORAGE
+        ════════════════════════════════════════════════ */
+        function saveState() {
+            localStorage.setItem(LS_KEY.idx,       JSON.stringify(currentIdx));
+            localStorage.setItem(LS_KEY.responses, JSON.stringify(responses));
+            localStorage.setItem(LS_KEY.elapsed,   JSON.stringify(elapsedSeconds));
+        }
+
+        function loadState() {
+            try {
+                const savedOrder   = localStorage.getItem(LS_KEY.order);
+                const savedResp    = localStorage.getItem(LS_KEY.responses);
+                const savedIdx     = localStorage.getItem(LS_KEY.idx);
+                const savedElapsed = localStorage.getItem(LS_KEY.elapsed);
+                const savedName    = localStorage.getItem(LS_KEY.name);
+                const savedEmail   = localStorage.getItem(LS_KEY.email);
+
+                if (savedOrder && savedResp !== null && savedIdx !== null) {
+                    if (savedName)  document.getElementById('user-name').value  = savedName;
+                    if (savedEmail) document.getElementById('user-email').value = savedEmail;
+
+                    shuffledQuestions = JSON.parse(savedOrder).map(id => rawQuestions.find(q => q.id === id));
+                    responses      = JSON.parse(savedResp);
+                    currentIdx     = JSON.parse(savedIdx);
+                    elapsedSeconds = savedElapsed ? JSON.parse(savedElapsed) : 0;
+                    startTime      = new Date();
+
+                    return true;
+                }
+            } catch(err) {
+                clearStorage();
+            }
+            return false;
+        }
+
+        function clearStorage() {
+            Object.values(LS_KEY).forEach(k => localStorage.removeItem(k));
+        }
+
+        /* ════════════════════════════════════════════════
+           INICIO
+        ════════════════════════════════════════════════ */
+        function startTest() {
+            const name  = document.getElementById('user-name').value.trim();
+            const email = document.getElementById('user-email').value.trim();
+
+            const nameParts = name.split(/\s+/).filter(w => w.length > 0);
+            if (nameParts.length < 2) {
+                return alert("Please enter your full name (first and last name).");
+            }
+            if (!email.includes('@')) {
+                return alert("Please enter a valid email address.");
+            }
+
+            const savedEmail = localStorage.getItem(LS_KEY.email);
+            const savedOrder = localStorage.getItem(LS_KEY.order);
+
+            if (savedEmail === email && savedOrder) {
+                const restored = loadState();
+                if (restored) {
+                    beginTestUI();
+                    return;
+                }
+            }
+
+            clearStorage();
+            shuffledQuestions = [...rawQuestions].sort(() => Math.random() - 0.5);
+            currentIdx     = 0;
+            responses      = {};
+            elapsedSeconds = 0;
+            startTime      = new Date();
+
+            localStorage.setItem(LS_KEY.name,  name);
+            localStorage.setItem(LS_KEY.email, email);
+            localStorage.setItem(LS_KEY.order, JSON.stringify(shuffledQuestions.map(q => q.id)));
+            saveState();
+
+            beginTestUI();
+        }
+
+        function beginTestUI() {
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('test-screen').classList.remove('hidden');
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(updateTimer, 1000);
+            showQuestion();
+        }
+
+        /* ════════════════════════════════════════════════
+           FLUJO DEL TEST
+        ════════════════════════════════════════════════ */
+        function showQuestion() {
+            const q = shuffledQuestions[currentIdx];
+            document.getElementById('question-text').innerText = q.text;
+            document.getElementById('progress-text').innerText = (currentIdx + 1) + "/50";
+            document.getElementById('progress-bar').style.width = ((currentIdx + 1) / 50 * 100) + "%";
+
+            document.querySelectorAll('.option-input').forEach(input => {
+                input.checked = false;
+            });
+
+            if (responses[q.id]) {
+                const saved = document.getElementById('r' + responses[q.id]);
+                if (saved) {
+                    saved.checked = true;
+                    enableNext();
+                    return;
+                }
+            }
+
+            document.getElementById('next-btn').disabled = true;
+        }
+
+        function enableNext() {
+            document.getElementById('next-btn').disabled = false;
+        }
+
+        function nextQuestion() {
+            const selected = document.querySelector('.option-input:checked');
+            if (!selected) return;
+
+            responses[shuffledQuestions[currentIdx].id] = parseInt(selected.value);
+            saveState();
+
+            if (currentIdx < 49) {
+                currentIdx++;
+                saveState();
+                showQuestion();
+            } else {
+                submitTest();
+            }
+        }
+
+        /* ════════════════════════════════════════════════
+           ENVÍO DE RESULTADOS
+           ⚠ No modificar el payload — estructura requerida
+             por el Google Apps Script
+        ════════════════════════════════════════════════ */
+        async function submitTest() {
+            document.getElementById('test-screen').innerHTML =
+                `<div class='text-center py-20' style='color: var(--zarego-muted);'>
+                    <div style='display:flex;align-items:center;justify-content:center;margin-bottom:1rem;'>
+                        <svg class='animate-spin-slow' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='url(#sg)'>
+                            <defs><linearGradient id='sg' x1='0%' y1='0%' x2='100%' y2='0%'><stop offset='0%' stop-color='#00D2FF'/><stop offset='100%' stop-color='#FF0055'/></linearGradient></defs>
+                            <path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M12 3v3m0 12v3M3 12h3m12 0h3M5.64 5.64l2.12 2.12m8.49 8.49l2.12 2.12M5.64 18.36l2.12-2.12m8.49-8.49l2.12-2.12'/>
+                        </svg>
+                    </div>
+                    <p class='eyebrow tracking-widest'>Sending Results…</p>
+                </div>`;
+
+            const scores = { O: 0, C: 0, E: 0, A: 0, N: 0 };
+
+            rawQuestions.forEach(q => {
+                let v = responses[q.id];
+                if (q.rev) v = 6 - v;
+                scores[q.cat] += v;
+            });
+
+            const diff = elapsedSeconds + Math.floor((new Date() - startTime) / 1000);
+
+            // ⚠ Estructura del payload: no cambiar
+            const payload = {
+                nombre:      document.getElementById('user-name').value,
+                email:       document.getElementById('user-email').value,
+                O:           (scores.O / 10).toFixed(2),
+                C:           (scores.C / 10).toFixed(2),
+                E:           (scores.E / 10).toFixed(2),
+                A:           (scores.A / 10).toFixed(2),
+                N:           (scores.N / 10).toFixed(2),
+                tiempo:      Math.floor(diff / 60) + "m " + (diff % 60) + "s",
+                individuales: responses
+            };
+
+            await fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+
+            clearStorage();
+            if (timerInterval) clearInterval(timerInterval);
+
+            document.getElementById('test-screen').classList.add('hidden');
+            document.getElementById('final-screen').classList.remove('hidden');
+        }
+
+        /* ════════════════════════════════════════════════
+           TIMER
+        ════════════════════════════════════════════════ */
+        function updateTimer() {
+            if (!startTime) return;
+            const d = elapsedSeconds + Math.floor((new Date() - startTime) / 1000);
+            document.getElementById('timer').innerText =
+                Math.floor(d / 60).toString().padStart(2, '0') + ":" +
+                (d % 60).toString().padStart(2, '0');
+        }
+
+        /* ════════════════════════════════════════════════
+           AL CARGAR LA PÁGINA:
+           Restaurar nombre/email si existe sesión previa
+        ════════════════════════════════════════════════ */
+        (function initPage() {
+            const savedName  = localStorage.getItem(LS_KEY.name);
+            const savedEmail = localStorage.getItem(LS_KEY.email);
+            const savedOrder = localStorage.getItem(LS_KEY.order);
+
+            if (savedName && savedEmail && savedOrder) {
+                document.getElementById('user-name').value  = savedName;
+                document.getElementById('user-email').value = savedEmail;
+            }
+        })();
+
+        // Pausar el timer al salir/refrescar
+        function freezeTimer() {
+            if (timerInterval && startTime) {
+                elapsedSeconds += Math.floor((new Date() - startTime) / 1000);
+                localStorage.setItem(LS_KEY.elapsed, JSON.stringify(elapsedSeconds));
+            }
+        }
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'hidden') freezeTimer();
+        });
+        window.addEventListener('pagehide', freezeTimer);
+    </script>
+</body>
+</html>
