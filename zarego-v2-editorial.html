@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zarego Personality Questionnaire</title>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --z-bg:       #FAF9F7;
+            --z-surface:  #FFFFFF;
+            --z-warm:     #F3EFE8;
+            --z-border:   #E8E2D9;
+            --z-text:     #2C2825;
+            --z-mid:      #7A726A;
+            --z-soft:     #B0A89E;
+            --z-cyan:     #00AACC;
+            --z-rose:     #E8405A;
+            --z-accent:   #6B5CE7;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--z-bg);
+            color: var(--z-text);
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 400;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* ─── Ambient background texture ─── */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 80% 60% at 85% 10%, rgba(0,170,204,0.07) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 10% 90%, rgba(232,64,90,0.05) 0%, transparent 55%),
+                radial-gradient(ellipse 40% 40% at 50% 50%, rgba(107,92,231,0.03) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ─── Wavy line decoration ─── */
+        .wave-line {
+            width: 48px;
+            height: 2px;
+            background: linear-gradient(90deg, var(--z-cyan), var(--z-rose));
+            border-radius: 2px;
+            margin: 0 auto 1.5rem;
+        }
+
+        /* ─── Card ─── */
+        #app {
+            background: var(--z-surface);
+            border: 1px solid var(--z-border);
+            box-shadow:
+                0 2px 4px rgba(44,40,37,0.04),
+                0 12px 48px rgba(44,40,37,0.07),
+                0 40px 80px rgba(44,40,37,0.04);
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ─── Header tag ─── */
+        .tag-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.68rem;
+            font-weight: 500;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--z-mid);
+            background: var(--z-warm);
+            border: 1px solid var(--z-border);
+            padding: 5px 12px;
+            border-radius: 100px;
+            margin-bottom: 1.75rem;
+        }
+        .tag-dot {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--z-cyan), var(--z-rose));
+        }
+
+        /* ─── Typography ─── */
+        h1 {
+            font-family: 'DM Serif Display', serif;
+            font-weight: 400;
+            line-height: 1.15;
+            color: var(--z-text);
+            letter-spacing: -0.01em;
+        }
+        .title-italic {
+            font-style: italic;
+            background: linear-gradient(100deg, var(--z-cyan) 0%, var(--z-accent) 50%, var(--z-rose) 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* ─── Divider ─── */
+        .soft-divider {
+            height: 1px;
+            background: var(--z-border);
+            margin: 1.75rem 0;
+        }
+
+        /* ─── Inputs ─── */
+        .input-z {
+            width: 100%;
+            padding: 14px 18px;
+            border-radius: 14px;
+            border: 1.5px solid var(--z-border);
+            background: var(--z-warm);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.92rem;
+            color: var(--z-text);
+            transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+            outline: none;
+        }
+        .input-z::placeholder { color: var(--z-soft); }
+        .input-z:focus {
+            border-color: var(--z-cyan);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(0,170,204,0.09);
+        }
+
+        /* ─── CTA Button ─── */
+        .btn-z {
+            width: 100%;
+            padding: 15px 24px;
+            border-radius: 14px;
+            background: var(--z-text);
+            color: white;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            cursor: pointer;
+            border: none;
+            transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+            box-shadow: 0 4px 16px rgba(44,40,37,0.18);
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-z::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, rgba(0,170,204,0.15), rgba(232,64,90,0.15));
+            opacity: 0;
+            transition: opacity 0.25s;
+        }
+        .btn-z:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(44,40,37,0.22); }
+        .btn-z:hover::after { opacity: 1; }
+        .btn-z:active { transform: scale(0.98); }
+        .btn-z:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* ─── Progress ─── */
+        .progress-track {
+            height: 3px;
+            background: var(--z-warm);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 2.5rem;
+        }
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            background: linear-gradient(90deg, var(--z-cyan), var(--z-accent), var(--z-rose));
+            background-size: 200% 100%;
+            transition: width 0.5s ease;
+            animation: shimmer 3s linear infinite;
+        }
+        @keyframes shimmer {
+            0%   { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* ─── Question text ─── */
+        #question-text {
+            font-family: 'DM Serif Display', serif;
+            font-size: clamp(1.2rem, 4vw, 1.55rem);
+            font-weight: 400;
+            color: var(--z-text);
+            line-height: 1.45;
+            text-align: center;
+            min-height: 90px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ─── Option buttons ─── */
+        .options-row {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: clamp(8px, 2.5vw, 16px);
+        }
+
+        .option-btn {
+            width: clamp(44px, 11vw, 54px);
+            height: clamp(44px, 11vw, 54px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1.5px solid var(--z-border);
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            flex-shrink: 0;
+            font-size: clamp(0.85rem, 3vw, 1rem);
+            font-weight: 600;
+            color: var(--z-soft);
+            background: var(--z-warm);
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+            font-family: 'DM Sans', sans-serif;
+        }
+        .option-btn:hover {
+            border-color: var(--z-cyan);
+            color: var(--z-text);
+            background: white;
+            box-shadow: 0 2px 12px rgba(0,170,204,0.12);
+        }
+
+        .option-input:checked + .option-btn {
+            background: linear-gradient(135deg, #00AACC 0%, #6B5CE7 50%, #E8405A 100%);
+            border-color: transparent;
+            color: white;
+            transform: scale(1.08);
+            box-shadow: 0 6px 20px rgba(0,170,204,0.3), 0 2px 6px rgba(232,64,90,0.2);
+        }
+
+        /* ─── Rating labels ─── */
+        .rating-block {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 2.5rem;
+        }
+        .rating-labels {
+            display: flex;
+            justify-content: space-between;
+            width: calc(5 * clamp(44px, 11vw, 54px) + 4 * clamp(8px, 2.5vw, 16px));
+            max-width: 100%;
+        }
+        .rating-labels span {
+            font-size: 0.62rem;
+            color: var(--z-soft);
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        /* ─── Meta row (progress + timer) ─── */
+        .meta-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .meta-label {
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--z-soft);
+        }
+        .meta-label.accent { color: var(--z-cyan); }
+
+        /* ─── Final screen ─── */
+        .check-wrap {
+            width: 80px;
+            height: 80px;
+            border-radius: 24px;
+            background: linear-gradient(135deg, rgba(0,170,204,0.1), rgba(107,92,231,0.08), rgba(232,64,90,0.07));
+            border: 1px solid var(--z-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 2rem;
+        }
+
+        /* ─── Sending loader ─── */
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spin { animation: spin 1.5s linear infinite; display: inline-block; }
+
+        @media (max-width: 640px) {
+            #app { border-radius: 1.5rem !important; }
+            .option-btn { border-radius: 10px; }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <div id="app" class="max-w-lg w-full rounded-3xl p-7 sm:p-12">
+
+        <!-- ══════════════ START SCREEN ══════════════ -->
+        <div id="start-screen">
+
+            <div style="text-align:center;">
+                <div class="tag-label" style="display:inline-flex;">
+                    <div class="tag-dot"></div>
+                    Zarego · Personality Questionnaire
+                    <div class="tag-dot"></div>
+                </div>
+            </div>
+
+            <h1 class="text-center mb-2" style="font-size: clamp(2rem, 7vw, 2.75rem);">
+                A few questions<br>about <span class="title-italic">who you are.</span>
+            </h1>
+
+            <div class="wave-line"></div>
+
+            <p style="text-align:center; color: var(--z-mid); font-size: 0.9rem; line-height: 1.75; margin-bottom: 0.75rem;">
+                This is a short, informal questionnaire designed to help us understand how you typically think and behave. There are no right or wrong answers — just honest ones.
+            </p>
+            <p style="text-align:center; color: var(--z-soft); font-size: 0.85rem; line-height: 1.7; margin-bottom: 2rem;">
+                Rate each statement from 1 to 5 based on how well it describes you. Trust your instincts — it takes just a few minutes.
+            </p>
+
+            <div class="soft-divider"></div>
+
+            <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:1.5rem;">
+                <input type="text"  id="user-name"  placeholder="Full Name"     class="input-z">
+                <input type="email" id="user-email" placeholder="Email Address" class="input-z">
+            </div>
+
+            <button onclick="startTest()" class="btn-z">Begin Questionnaire</button>
+
+        </div>
+
+        <!-- ══════════════ TEST SCREEN ══════════════ -->
+        <div id="test-screen" class="hidden">
+
+            <div class="meta-row">
+                <span id="progress-text" class="meta-label accent">1 / 50</span>
+                <span id="timer" class="meta-label">00:00</span>
+            </div>
+
+            <div class="progress-track">
+                <div id="progress-bar" class="progress-fill" style="width: 0%"></div>
+            </div>
+
+            <p id="question-text"></p>
+
+            <div class="rating-block" style="margin-top: 2rem;">
+                <div class="options-row">
+                    <input type="radio" name="q" id="r1" value="1" class="hidden option-input" onchange="enableNext()"><label for="r1" class="option-btn">1</label>
+                    <input type="radio" name="q" id="r2" value="2" class="hidden option-input" onchange="enableNext()"><label for="r2" class="option-btn">2</label>
+                    <input type="radio" name="q" id="r3" value="3" class="hidden option-input" onchange="enableNext()"><label for="r3" class="option-btn">3</label>
+                    <input type="radio" name="q" id="r4" value="4" class="hidden option-input" onchange="enableNext()"><label for="r4" class="option-btn">4</label>
+                    <input type="radio" name="q" id="r5" value="5" class="hidden option-input" onchange="enableNext()"><label for="r5" class="option-btn">5</label>
+                </div>
+                <div class="rating-labels">
+                    <span>Inaccurate</span>
+                    <span>Accurate</span>
+                </div>
+            </div>
+
+            <button id="next-btn" onclick="nextQuestion()" disabled class="btn-z">Continue</button>
+
+        </div>
+
+        <!-- ══════════════ FINAL SCREEN ══════════════ -->
+        <div id="final-screen" class="hidden" style="text-align:center; padding: 3rem 0;">
+            <div class="check-wrap">
+                <svg width="36" height="36" fill="none" viewBox="0 0 24 24">
+                    <defs>
+                        <linearGradient id="cg" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#00AACC"/>
+                            <stop offset="50%" stop-color="#6B5CE7"/>
+                            <stop offset="100%" stop-color="#E8405A"/>
+                        </linearGradient>
+                    </defs>
+                    <path stroke="url(#cg)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                </svg>
+            </div>
+            <div class="tag-label" style="display:inline-flex; margin-bottom:1rem;">All done</div>
+            <h1 style="font-size: clamp(1.8rem, 6vw, 2.5rem); margin-bottom: 0.75rem;">
+                Thank you<br>for your <span class="title-italic">time.</span>
+            </h1>
+            <div class="wave-line" style="margin-top: 1.25rem;"></div>
+            <p style="color: var(--z-mid); font-size: 0.9rem; margin-top: 1.25rem;">Your answers have been successfully recorded.</p>
+        </div>
+
+    </div>
+
+    <script>
+        /* ════════════════════════════════════════════════
+           CONFIGURACIÓN
+        ════════════════════════════════════════════════ */
+        const API_URL = "https://script.google.com/macros/s/AKfycbyenKVTcMrv2BeHVpQ_BCt1MfWUvGGdgYfS6U52G20hR42UUc5ILV9jP88WLVqtq6x9DQ/exec";
+
+        const LS_KEY = {
+            name:      "zpt_name",
+            email:     "zpt_email",
+            order:     "zpt_order",
+            responses: "zpt_responses",
+            idx:       "zpt_idx",
+            startTime: "zpt_startTime",
+            elapsed:   "zpt_elapsed",
+        };
+
+        /* ════════════════════════════════════════════════
+           PREGUNTAS ORIGINALES (IDs 1–50, nunca modificar)
+        ════════════════════════════════════════════════ */
+        const rawQuestions = [
+            {id:1,  text:"Have a rich vocabulary.",                                     cat:"O", rev:false},
+            {id:2,  text:"Am full of ideas.",                                           cat:"O", rev:false},
+            {id:3,  text:"Am quick to understand complex concepts.",                    cat:"O", rev:false},
+            {id:4,  text:"See beauty in things that others might not notice.",          cat:"O", rev:false},
+            {id:5,  text:"Enjoy trying new and unfamiliar things.",                     cat:"O", rev:false},
+            {id:6,  text:"Am curious about many different topics.",                     cat:"O", rev:false},
+            {id:7,  text:"Prefer to stick with things that I know.",                    cat:"O", rev:true},
+            {id:8,  text:"Dislike changes.",                                            cat:"O", rev:true},
+            {id:9,  text:"Avoid philosophical discussions.",                            cat:"O", rev:true},
+            {id:10, text:"Do not have a good imagination.",                             cat:"O", rev:true},
+            {id:11, text:"Pay attention to details.",                                   cat:"C", rev:false},
+            {id:12, text:"Follow a schedule.",                                          cat:"C", rev:false},
+            {id:13, text:"Plan tasks carefully before starting them.",                  cat:"C", rev:false},
+            {id:14, text:"Finish what I start.",                                        cat:"C", rev:false},
+            {id:15, text:"Keep my promises.",                                           cat:"C", rev:false},
+            {id:16, text:"Work hard to achieve my goals.",                              cat:"C", rev:false},
+            {id:17, text:"Often forget to put things back in their proper place.",      cat:"C", rev:true},
+            {id:18, text:"Find it difficult to stay focused on tasks.",                 cat:"C", rev:true},
+            {id:19, text:"Start tasks right away.",                                     cat:"C", rev:false},
+            {id:20, text:"Act without thinking things through.",                        cat:"C", rev:true},
+            {id:21, text:"Feel comfortable around people.",                             cat:"E", rev:false},
+            {id:22, text:"Make friends easily.",                                        cat:"E", rev:false},
+            {id:23, text:"Start conversations.",                                        cat:"E", rev:false},
+            {id:24, text:"Am the life of the party.",                                   cat:"E", rev:false},
+            {id:25, text:"Enjoy being the center of attention.",                        cat:"E", rev:false},
+            {id:26, text:"Feel energized when I am around others.",                     cat:"E", rev:false},
+            {id:27, text:"Don't talk a lot.",                                           cat:"E", rev:true},
+            {id:28, text:"Keep in the background.",                                     cat:"E", rev:true},
+            {id:29, text:"Prefer to spend time alone.",                                 cat:"E", rev:true},
+            {id:30, text:"Find it difficult to approach others.",                       cat:"E", rev:true},
+            {id:31, text:"Sympathize with others' feelings.",                           cat:"A", rev:false},
+            {id:32, text:"Take time out for others.",                                   cat:"A", rev:false},
+            {id:33, text:"Trust others.",                                               cat:"A", rev:false},
+            {id:34, text:"Love to help others.",                                        cat:"A", rev:false},
+            {id:35, text:"Am considerate and kind to almost everyone.",                 cat:"A", rev:false},
+            {id:36, text:"Am willing to compromise to avoid conflict.",                 cat:"A", rev:false},
+            {id:37, text:"Am not interested in other people's problems.",               cat:"A", rev:true},
+            {id:38, text:"Use flattery to get ahead.",                                  cat:"A", rev:true},
+            {id:39, text:"Believe that I am better than others.",                       cat:"A", rev:true},
+            {id:40, text:"Can be rude to others.",                                      cat:"A", rev:true},
+            {id:41, text:"Get stressed out easily.",                                    cat:"N", rev:false},
+            {id:42, text:"Worry about things.",                                         cat:"N", rev:false},
+            {id:43, text:"Get irritated easily.",                                       cat:"N", rev:false},
+            {id:44, text:"Change my mood frequently.",                                  cat:"N", rev:false},
+            {id:45, text:"Feel insecure about myself.",                                 cat:"N", rev:false},
+            {id:46, text:"Often feel anxious or tense.",                                cat:"N", rev:false},
+            {id:47, text:"Am relaxed most of the time.",                                cat:"N", rev:true},
+            {id:48, text:"Remain calm under pressure.",                                 cat:"N", rev:true},
+            {id:49, text:"Am easily intimidated.",                                      cat:"N", rev:false},
+            {id:50, text:"Feel emotionally stable most of the time.",                   cat:"N", rev:true},
+        ];
+
+        /* ════════════════════════════════════════════════
+           ESTADO GLOBAL
+        ════════════════════════════════════════════════ */
+        let shuffledQuestions = [];
+        let currentIdx    = 0;
+        let responses     = {};
+        let startTime     = null;
+        let timerInterval = null;
+        let elapsedSeconds = 0;
+
+        /* ════════════════════════════════════════════════
+           HELPERS DE LOCALSTORAGE
+        ════════════════════════════════════════════════ */
+        function saveState() {
+            localStorage.setItem(LS_KEY.idx,       JSON.stringify(currentIdx));
+            localStorage.setItem(LS_KEY.responses, JSON.stringify(responses));
+            localStorage.setItem(LS_KEY.elapsed,   JSON.stringify(elapsedSeconds));
+        }
+
+        function loadState() {
+            try {
+                const savedOrder   = localStorage.getItem(LS_KEY.order);
+                const savedResp    = localStorage.getItem(LS_KEY.responses);
+                const savedIdx     = localStorage.getItem(LS_KEY.idx);
+                const savedElapsed = localStorage.getItem(LS_KEY.elapsed);
+                const savedName    = localStorage.getItem(LS_KEY.name);
+                const savedEmail   = localStorage.getItem(LS_KEY.email);
+
+                if (savedOrder && savedResp !== null && savedIdx !== null) {
+                    if (savedName)  document.getElementById('user-name').value  = savedName;
+                    if (savedEmail) document.getElementById('user-email').value = savedEmail;
+
+                    shuffledQuestions = JSON.parse(savedOrder).map(id => rawQuestions.find(q => q.id === id));
+                    responses      = JSON.parse(savedResp);
+                    currentIdx     = JSON.parse(savedIdx);
+                    elapsedSeconds = savedElapsed ? JSON.parse(savedElapsed) : 0;
+                    startTime      = new Date();
+
+                    return true;
+                }
+            } catch(err) {
+                clearStorage();
+            }
+            return false;
+        }
+
+        function clearStorage() {
+            Object.values(LS_KEY).forEach(k => localStorage.removeItem(k));
+        }
+
+        /* ════════════════════════════════════════════════
+           INICIO
+        ════════════════════════════════════════════════ */
+        function startTest() {
+            const name  = document.getElementById('user-name').value.trim();
+            const email = document.getElementById('user-email').value.trim();
+
+            const nameParts = name.split(/\s+/).filter(w => w.length > 0);
+            if (nameParts.length < 2) {
+                return alert("Please enter your full name (first and last name).");
+            }
+            if (!email.includes('@')) {
+                return alert("Please enter a valid email address.");
+            }
+
+            const savedEmail = localStorage.getItem(LS_KEY.email);
+            const savedOrder = localStorage.getItem(LS_KEY.order);
+
+            if (savedEmail === email && savedOrder) {
+                const restored = loadState();
+                if (restored) {
+                    beginTestUI();
+                    return;
+                }
+            }
+
+            clearStorage();
+            shuffledQuestions = [...rawQuestions].sort(() => Math.random() - 0.5);
+            currentIdx     = 0;
+            responses      = {};
+            elapsedSeconds = 0;
+            startTime      = new Date();
+
+            localStorage.setItem(LS_KEY.name,  name);
+            localStorage.setItem(LS_KEY.email, email);
+            localStorage.setItem(LS_KEY.order, JSON.stringify(shuffledQuestions.map(q => q.id)));
+            saveState();
+
+            beginTestUI();
+        }
+
+        function beginTestUI() {
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('test-screen').classList.remove('hidden');
+            if (timerInterval) clearInterval(timerInterval);
+            timerInterval = setInterval(updateTimer, 1000);
+            showQuestion();
+        }
+
+        /* ════════════════════════════════════════════════
+           FLUJO DEL TEST
+        ════════════════════════════════════════════════ */
+        function showQuestion() {
+            const q = shuffledQuestions[currentIdx];
+            document.getElementById('question-text').innerText = q.text;
+            document.getElementById('progress-text').innerText = (currentIdx + 1) + " / 50";
+            document.getElementById('progress-bar').style.width = ((currentIdx + 1) / 50 * 100) + "%";
+
+            document.querySelectorAll('.option-input').forEach(input => {
+                input.checked = false;
+            });
+
+            if (responses[q.id]) {
+                const saved = document.getElementById('r' + responses[q.id]);
+                if (saved) {
+                    saved.checked = true;
+                    enableNext();
+                    return;
+                }
+            }
+
+            document.getElementById('next-btn').disabled = true;
+        }
+
+        function enableNext() {
+            document.getElementById('next-btn').disabled = false;
+        }
+
+        function nextQuestion() {
+            const selected = document.querySelector('.option-input:checked');
+            if (!selected) return;
+
+            responses[shuffledQuestions[currentIdx].id] = parseInt(selected.value);
+            saveState();
+
+            if (currentIdx < 49) {
+                currentIdx++;
+                saveState();
+                showQuestion();
+            } else {
+                submitTest();
+            }
+        }
+
+        /* ════════════════════════════════════════════════
+           ENVÍO DE RESULTADOS
+           ⚠ No modificar el payload — estructura requerida
+             por el Google Apps Script
+        ════════════════════════════════════════════════ */
+        async function submitTest() {
+            document.getElementById('test-screen').innerHTML =
+                `<div style="text-align:center; padding: 5rem 0; color: var(--z-mid);">
+                    <div style="font-size:1.8rem; margin-bottom:1rem;" class="spin">◌</div>
+                    <p style="font-size:0.78rem; font-weight:600; letter-spacing:0.12em; text-transform:uppercase;">Sending your answers…</p>
+                </div>`;
+
+            const scores = { O: 0, C: 0, E: 0, A: 0, N: 0 };
+
+            rawQuestions.forEach(q => {
+                let v = responses[q.id];
+                if (q.rev) v = 6 - v;
+                scores[q.cat] += v;
+            });
+
+            const diff = elapsedSeconds + Math.floor((new Date() - startTime) / 1000);
+
+            // ⚠ Estructura del payload: no cambiar
+            const payload = {
+                nombre:      document.getElementById('user-name').value,
+                email:       document.getElementById('user-email').value,
+                O:           (scores.O / 10).toFixed(2),
+                C:           (scores.C / 10).toFixed(2),
+                E:           (scores.E / 10).toFixed(2),
+                A:           (scores.A / 10).toFixed(2),
+                N:           (scores.N / 10).toFixed(2),
+                tiempo:      Math.floor(diff / 60) + "m " + (diff % 60) + "s",
+                individuales: responses
+            };
+
+            await fetch(API_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+
+            clearStorage();
+            if (timerInterval) clearInterval(timerInterval);
+
+            document.getElementById('test-screen').classList.add('hidden');
+            document.getElementById('final-screen').classList.remove('hidden');
+        }
+
+        /* ════════════════════════════════════════════════
+           TIMER
+        ════════════════════════════════════════════════ */
+        function updateTimer() {
+            if (!startTime) return;
+            const d = elapsedSeconds + Math.floor((new Date() - startTime) / 1000);
+            document.getElementById('timer').innerText =
+                Math.floor(d / 60).toString().padStart(2, '0') + ":" +
+                (d % 60).toString().padStart(2, '0');
+        }
+
+        /* ════════════════════════════════════════════════
+           AL CARGAR LA PÁGINA
+        ════════════════════════════════════════════════ */
+        (function initPage() {
+            const savedName  = localStorage.getItem(LS_KEY.name);
+            const savedEmail = localStorage.getItem(LS_KEY.email);
+            const savedOrder = localStorage.getItem(LS_KEY.order);
+
+            if (savedName && savedEmail && savedOrder) {
+                document.getElementById('user-name').value  = savedName;
+                document.getElementById('user-email').value = savedEmail;
+            }
+        })();
+
+        function freezeTimer() {
+            if (timerInterval && startTime) {
+                elapsedSeconds += Math.floor((new Date() - startTime) / 1000);
+                localStorage.setItem(LS_KEY.elapsed, JSON.stringify(elapsedSeconds));
+            }
+        }
+        document.addEventListener('visibilitychange', function() {
+            if (document.visibilityState === 'hidden') freezeTimer();
+        });
+        window.addEventListener('pagehide', freezeTimer);
+    </script>
+</body>
+</html>
