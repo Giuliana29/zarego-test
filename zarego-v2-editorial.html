@@ -230,6 +230,9 @@
             -webkit-user-select: none;
             touch-action: manipulation;
             font-family: 'DM Sans', sans-serif;
+            position: relative;
+            overflow: hidden;
+            z-index: 0;
         }
         .option-btn:hover {
             border-color: var(--z-cyan);
@@ -238,12 +241,27 @@
             box-shadow: 0 2px 12px rgba(0,170,204,0.12);
         }
 
-        .option-input:checked + .option-btn {
+        .option-btn::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 14px;
             background: linear-gradient(135deg, #00AACC 0%, #6B5CE7 50%, #E8405A 100%);
+            opacity: 0;
+            transition: opacity 0.18s ease;
+            z-index: -1;
+        }
+
+        .option-input:checked + .option-btn {
             border-color: transparent;
             color: white;
             transform: scale(1.08);
             box-shadow: 0 6px 20px rgba(0,170,204,0.3), 0 2px 6px rgba(232,64,90,0.2);
+            background: transparent;
+        }
+
+        .option-input:checked + .option-btn::before {
+            opacity: 1;
         }
 
         /* ─── Rating labels ─── */
@@ -329,10 +347,10 @@
             <div class="wave-line"></div>
 
             <p style="text-align:center; color: var(--z-mid); font-size: 0.9rem; line-height: 1.75; margin-bottom: 0.75rem;">
-                This is a short, informal questionnaire designed to help us understand how you typically think and behave. There are no right or wrong answers — just honest ones.
+                This assessment explores your typical behaviors through a series of short statements. Rate them from 1 to 5 based on how well they describe you.
             </p>
             <p style="text-align:center; color: var(--z-soft); font-size: 0.85rem; line-height: 1.7; margin-bottom: 2rem;">
-                Rate each statement from 1 to 5 based on how well it describes you. Trust your instincts — it takes just a few minutes.
+                Please keep in mind that this is not a decisive test; it's simply a way for us to get to know you better. Trust your gut and enjoy the process! It will only take a few minutes, and we recommend completing it in a single session.
             </p>
 
             <div class="soft-divider"></div>
