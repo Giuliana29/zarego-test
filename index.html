@@ -4,312 +4,381 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zarego Personality Questionnaire</title>
-    <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800;900&family=Barlow+Condensed:wght@700;800;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         :root {
-            --zarego-cyan: #00D2FF;
-            --zarego-magenta: #FF0055;
-            --zarego-bg: #F5F6FA;
-            --zarego-surface: #FFFFFF;
-            --zarego-border: #E2E5EF;
-            --zarego-text: #1A1D2E;
-            --zarego-muted: #7B7F96;
-            --zarego-subtle: #A0A4BB;
+            --z-bg:       #FAF9F7;
+            --z-surface:  #FFFFFF;
+            --z-warm:     #F3EFE8;
+            --z-border:   #E8E2D9;
+            --z-text:     #2C2825;
+            --z-mid:      #7A726A;
+            --z-soft:     #B0A89E;
+            --z-cyan:     #00AACC;
+            --z-rose:     #E8405A;
+            --z-accent:   #6B5CE7;
         }
 
-        * { box-sizing: border-box; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
 
         body {
-            background-color: var(--zarego-bg);
-            color: var(--zarego-text);
-            font-family: 'Barlow', sans-serif;
+            background-color: var(--z-bg);
+            color: var(--z-text);
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 400;
             overflow-x: hidden;
             min-height: 100vh;
         }
 
-        /* ── Background decorative circles (from Vie theme) ── */
-        .circle-bg {
+        /* ─── Ambient background texture ─── */
+        body::before {
+            content: '';
             position: fixed;
             inset: 0;
+            background:
+                radial-gradient(ellipse 80% 60% at 85% 10%, rgba(0,170,204,0.07) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 50% at 10% 90%, rgba(232,64,90,0.05) 0%, transparent 55%),
+                radial-gradient(ellipse 40% 40% at 50% 50%, rgba(107,92,231,0.03) 0%, transparent 70%);
             pointer-events: none;
             z-index: 0;
-            overflow: hidden;
-        }
-        .gradient-circle {
-            position: absolute;
-            width: 600px;
-            height: 600px;
-            border-radius: 50%;
-            background: radial-gradient(circle, rgba(0,210,255,0.06) 0%, transparent 70%);
-            top: -200px;
-            right: -150px;
-        }
-        .gradient-circle.two {
-            background: radial-gradient(circle, rgba(255,0,85,0.05) 0%, transparent 70%);
-            bottom: -200px;
-            left: -150px;
-            top: auto;
-            right: auto;
         }
 
-        /* ── Gradient accent text ── */
-        .gradient-text {
-            background: linear-gradient(90deg, var(--zarego-cyan), var(--zarego-magenta));
+        /* ─── Wavy line decoration ─── */
+        .wave-line {
+            width: 48px;
+            height: 2px;
+            background: linear-gradient(90deg, var(--z-cyan), var(--z-rose));
+            border-radius: 2px;
+            margin: 0 auto 1.5rem;
+        }
+
+        /* ─── Card ─── */
+        #app {
+            background: var(--z-surface);
+            border: 1px solid var(--z-border);
+            box-shadow:
+                0 2px 4px rgba(44,40,37,0.04),
+                0 12px 48px rgba(44,40,37,0.07),
+                0 40px 80px rgba(44,40,37,0.04);
+            position: relative;
+            z-index: 1;
+        }
+
+        /* ─── Header tag ─── */
+        .tag-label {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.68rem;
+            font-weight: 500;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: var(--z-mid);
+            background: var(--z-warm);
+            border: 1px solid var(--z-border);
+            padding: 5px 12px;
+            border-radius: 100px;
+            margin-bottom: 1.75rem;
+        }
+        .tag-dot {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--z-cyan), var(--z-rose));
+        }
+
+        /* ─── Typography ─── */
+        h1 {
+            font-family: 'DM Serif Display', serif;
+            font-weight: 400;
+            line-height: 1.15;
+            color: var(--z-text);
+            letter-spacing: -0.01em;
+        }
+        .title-italic {
+            font-style: italic;
+            background: linear-gradient(100deg, var(--z-cyan) 0%, var(--z-accent) 50%, var(--z-rose) 100%);
             -webkit-background-clip: text;
             background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
-        /* ── Main card ── */
-        #app {
-            background: var(--zarego-surface);
-            border: 1px solid var(--zarego-border);
-            box-shadow: 0 8px 40px rgba(26,29,46,0.08), 0 2px 8px rgba(26,29,46,0.04);
-            position: relative;
-            z-index: 1;
+        /* ─── Divider ─── */
+        .soft-divider {
+            height: 1px;
+            background: var(--z-border);
+            margin: 1.75rem 0;
         }
 
-        /* ── Option buttons ── */
-        .option-btn {
-            width: clamp(42px, 11vw, 52px);
-            height: clamp(42px, 11vw, 52px);
+        /* ─── Inputs ─── */
+        .input-z {
+            width: 100%;
+            padding: 14px 18px;
+            border-radius: 14px;
+            border: 1.5px solid var(--z-border);
+            background: var(--z-warm);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.92rem;
+            color: var(--z-text);
+            transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+            outline: none;
+        }
+        .input-z::placeholder { color: var(--z-soft); }
+        .input-z:focus {
+            border-color: var(--z-cyan);
+            background: white;
+            box-shadow: 0 0 0 4px rgba(0,170,204,0.09);
+        }
+
+        /* ─── CTA Button ─── */
+        .btn-z {
+            width: 100%;
+            padding: 15px 24px;
+            border-radius: 14px;
+            background: var(--z-text);
+            color: white;
+            font-family: 'DM Sans', sans-serif;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            cursor: pointer;
+            border: none;
+            transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+            box-shadow: 0 4px 16px rgba(44,40,37,0.18);
+            position: relative;
+            overflow: hidden;
+        }
+        .btn-z::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, rgba(0,170,204,0.15), rgba(232,64,90,0.15));
+            opacity: 0;
+            transition: opacity 0.25s;
+        }
+        .btn-z:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(44,40,37,0.22); }
+        .btn-z:hover::after { opacity: 1; }
+        .btn-z:active { transform: scale(0.98); }
+        .btn-z:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* ─── Progress ─── */
+        .progress-track {
+            height: 3px;
+            background: var(--z-warm);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 2.5rem;
+        }
+        .progress-fill {
+            height: 100%;
+            border-radius: 4px;
+            background: linear-gradient(90deg, var(--z-cyan), var(--z-accent), var(--z-rose));
+            background-size: 200% 100%;
+            transition: width 0.5s ease;
+            animation: shimmer 3s linear infinite;
+        }
+        @keyframes shimmer {
+            0%   { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* ─── Question text ─── */
+        #question-text {
+            font-family: 'DM Serif Display', serif;
+            font-size: clamp(1.2rem, 4vw, 1.55rem);
+            font-weight: 400;
+            color: var(--z-text);
+            line-height: 1.45;
+            text-align: center;
+            min-height: 90px;
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 2px solid var(--zarego-border);
-            border-radius: 50%;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            flex-shrink: 0;
-            font-size: clamp(0.85rem, 3vw, 1rem);
-            font-weight: 700;
-            color: var(--zarego-muted);
-            background: #F9FAFB;
-            user-select: none;
-            -webkit-user-select: none;
-            touch-action: manipulation;
         }
 
-        .option-btn:hover {
-            border-color: var(--zarego-cyan);
-            color: var(--zarego-text);
-            background: #F0FDFF;
-        }
-
-        .option-input:checked + .option-btn {
-            background: linear-gradient(135deg, var(--zarego-cyan), var(--zarego-magenta));
-            border-color: transparent;
-            color: white;
-            transform: scale(1.1);
-            box-shadow: 0 4px 16px rgba(0,210,255,0.3);
-        }
-
-        /* ── CTA Button ── */
-        .btn-zarego {
-            background: linear-gradient(90deg, var(--zarego-cyan), var(--zarego-magenta));
-            color: white;
-            font-family: 'Barlow Condensed', sans-serif;
-            letter-spacing: 0.12em;
-            font-weight: 800;
-            transition: all 0.25s ease;
-            box-shadow: 0 4px 20px rgba(0,210,255,0.25);
-        }
-        .btn-zarego:hover {
-            box-shadow: 0 8px 30px rgba(0,210,255,0.4);
-            transform: translateY(-1px);
-        }
-        .btn-zarego:active {
-            transform: scale(0.97) translateY(0);
-        }
-        .btn-zarego:disabled {
-            opacity: 0.45;
-            box-shadow: none;
-            transform: none;
-        }
-
-        /* ── Inputs ── */
-        .input-zarego {
-            background: #F9FAFB;
-            border: 1.5px solid var(--zarego-border);
-            color: var(--zarego-text);
-            font-family: 'Barlow', sans-serif;
-            font-size: 0.95rem;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-        .input-zarego::placeholder {
-            color: var(--zarego-subtle);
-        }
-        .input-zarego:focus {
-            outline: none;
-            border-color: var(--zarego-cyan);
-            box-shadow: 0 0 0 3px rgba(0,210,255,0.12);
-            background: white;
-        }
-
-        /* ── Progress bar track ── */
-        .progress-track {
-            background: #EDF0F7;
-        }
-
-        /* ── Options row ── */
+        /* ─── Option buttons ─── */
         .options-row {
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: clamp(8px, 2.5vw, 14px);
-            flex-wrap: nowrap;
-            width: 100%;
+            gap: clamp(8px, 2.5vw, 16px);
         }
 
-        /* ── Rating block ── */
+        .option-btn {
+            width: clamp(44px, 11vw, 54px);
+            height: clamp(44px, 11vw, 54px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1.5px solid var(--z-border);
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            flex-shrink: 0;
+            font-size: clamp(0.85rem, 3vw, 1rem);
+            font-weight: 600;
+            color: var(--z-soft);
+            background: var(--z-warm);
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+            font-family: 'DM Sans', sans-serif;
+            position: relative;
+            overflow: hidden;
+            z-index: 0;
+        }
+        .option-btn:hover {
+            border-color: var(--z-cyan);
+            color: var(--z-text);
+            background: white;
+            box-shadow: 0 2px 12px rgba(0,170,204,0.12);
+        }
+
+        .option-btn::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 14px;
+            background: linear-gradient(135deg, #00AACC 0%, #6B5CE7 50%, #E8405A 100%);
+            opacity: 0;
+            transition: opacity 0.18s ease;
+            z-index: -1;
+        }
+
+        .option-input:checked + .option-btn {
+            border-color: transparent;
+            color: white;
+            transform: scale(1.08);
+            box-shadow: 0 6px 20px rgba(0,170,204,0.3), 0 2px 6px rgba(232,64,90,0.2);
+            background: transparent;
+        }
+
+        .option-input:checked + .option-btn::before {
+            opacity: 1;
+        }
+
+        /* ─── Rating labels ─── */
         .rating-block {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 10px;
-            width: 100%;
+            gap: 12px;
+            margin-bottom: 2.5rem;
         }
-
-        /* ── Rating labels ── */
         .rating-labels {
             display: flex;
             justify-content: space-between;
-            width: calc(5 * clamp(42px, 11vw, 52px) + 4 * clamp(8px, 2.5vw, 14px));
+            width: calc(5 * clamp(44px, 11vw, 54px) + 4 * clamp(8px, 2.5vw, 16px));
             max-width: 100%;
         }
-
         .rating-labels span {
-            font-size: 0.65rem;
-            color: var(--zarego-subtle);
-            font-weight: 700;
-            letter-spacing: 0.08em;
+            font-size: 0.62rem;
+            color: var(--z-soft);
+            font-weight: 500;
+            letter-spacing: 0.1em;
             text-transform: uppercase;
         }
 
-        /* ── Section eyebrow label ── */
-        .eyebrow {
-            font-family: 'Barlow Condensed', sans-serif;
-            font-size: 0.7rem;
-            font-weight: 800;
-            letter-spacing: 0.18em;
-            text-transform: uppercase;
-            color: var(--zarego-muted);
-        }
-
-        /* ── Divider ── */
-        .divider {
-            height: 1px;
-            background: var(--zarego-border);
-            width: 100%;
-        }
-
-        /* ── Logo mark top ── */
-        .logo-mark {
-            display: inline-flex;
+        /* ─── Meta row (progress + timer) ─── */
+        .meta-row {
+            display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 8px;
-            margin-bottom: 1.5rem;
+            margin-bottom: 10px;
         }
-        .logo-mark-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--zarego-cyan), var(--zarego-magenta));
-        }
-        .logo-mark-text {
-            font-family: 'Barlow Condensed', sans-serif;
-            font-size: 0.7rem;
-            font-weight: 800;
-            letter-spacing: 0.2em;
+        .meta-label {
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.1em;
             text-transform: uppercase;
-            color: var(--zarego-muted);
+            color: var(--z-soft);
         }
+        .meta-label.accent { color: var(--z-cyan); }
 
-        /* ── Sending animation ── */
-        @keyframes spin-slow {
-            to { transform: rotate(360deg); }
-        }
-        .animate-spin-slow {
-            animation: spin-slow 2s linear infinite;
-        }
-
-        /* ── Final screen checkmark ── */
-        .check-circle {
-            width: 72px;
-            height: 72px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, rgba(0,210,255,0.1), rgba(255,0,85,0.08));
-            border: 2px solid var(--zarego-border);
+        /* ─── Final screen ─── */
+        .check-wrap {
+            width: 80px;
+            height: 80px;
+            border-radius: 24px;
+            background: linear-gradient(135deg, rgba(0,170,204,0.1), rgba(107,92,231,0.08), rgba(232,64,90,0.07));
+            border: 1px solid var(--z-border);
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 1.5rem;
+            margin: 0 auto 2rem;
         }
+
+        /* ─── Sending loader ─── */
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .spin { animation: spin 1.5s linear infinite; display: inline-block; }
 
         @media (max-width: 640px) {
             #app { border-radius: 1.5rem !important; }
+            .option-btn { border-radius: 10px; }
         }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
 
-    <!-- Decorative background -->
-    <div class="circle-bg">
-        <div class="gradient-circle"></div>
-        <div class="gradient-circle two"></div>
-    </div>
-
-    <div id="app" class="max-w-xl w-full rounded-3xl p-6 sm:p-10">
+    <div id="app" class="max-w-lg w-full rounded-3xl p-7 sm:p-12">
 
         <!-- ══════════════ START SCREEN ══════════════ -->
         <div id="start-screen">
 
-            <div class="logo-mark justify-center">
-                <div class="logo-mark-dot"></div>
-                <span class="logo-mark-text">Zarego · Assessment</span>
-                <div class="logo-mark-dot"></div>
+            <div style="text-align:center;">
+                <div class="tag-label" style="display:inline-flex;">
+                    <div class="tag-dot"></div>
+                    Zarego · Personality Questionnaire
+                    <div class="tag-dot"></div>
+                </div>
             </div>
 
-            <h1 class="text-4xl sm:text-5xl font-black mb-2 uppercase tracking-tight text-center leading-tight" style="font-family: 'Barlow Condensed', sans-serif;">
-                Personality <span class="gradient-text">Questionnaire</span>
+            <h1 class="text-center mb-2" style="font-size: clamp(2rem, 7vw, 2.75rem);">
+                A few questions<br>about <span class="title-italic">who you are.</span>
             </h1>
 
-            <div class="divider my-6"></div>
+            <div class="wave-line"></div>
 
-            <div class="space-y-3 mb-8 text-center" style="color: var(--zarego-muted); font-size: 0.92rem; line-height: 1.7;">
-                <p>This assessment explores your typical behaviors through a series of short statements. Rate them from 1 to 5 based on how well they describe you.</p>
-                <p>Please keep in mind that this is not a decisive test; it's simply a way for us to get to know you better. Trust your gut and enjoy the process! It will only take a few minutes, and we recommend completing it in a single session.</p>
+            <p style="text-align:center; color: var(--z-mid); font-size: 0.9rem; line-height: 1.75; margin-bottom: 0.75rem;">
+                This assessment explores your typical behaviors through a series of short statements. Rate them from 1 to 5 based on how well they describe you.
+            </p>
+            <p style="text-align:center; color: var(--z-soft); font-size: 0.85rem; line-height: 1.7; margin-bottom: 2rem;">
+                Please keep in mind that this is not a decisive test; it's simply a way for us to get to know you better. Trust your gut and enjoy the process! It will only take a few minutes, and we recommend completing it in a single session.
+            </p>
+
+            <div class="soft-divider"></div>
+
+            <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:1.5rem;">
+                <input type="text"  id="user-name"  placeholder="Full Name"     class="input-z">
+                <input type="email" id="user-email" placeholder="Email Address" class="input-z">
             </div>
 
-            <div class="space-y-3 mb-8">
-                <input type="text"  id="user-name"  placeholder="Full Name"
-                    class="input-zarego w-full p-4 rounded-xl">
-                <input type="email" id="user-email" placeholder="Email Address"
-                    class="input-zarego w-full p-4 rounded-xl">
-            </div>
+            <button onclick="startTest()" class="btn-z">Begin Questionnaire</button>
 
-            <button onclick="startTest()"
-                class="btn-zarego w-full py-4 rounded-xl text-sm uppercase">
-                Start Assessment
-            </button>
         </div>
 
         <!-- ══════════════ TEST SCREEN ══════════════ -->
         <div id="test-screen" class="hidden">
 
-            <div class="flex justify-between items-center mb-3">
-                <span id="progress-text" class="eyebrow" style="color: var(--zarego-cyan);">1/50</span>
-                <span id="timer" class="eyebrow">00:00</span>
+            <div class="meta-row">
+                <span id="progress-text" class="meta-label accent">1 / 50</span>
+                <span id="timer" class="meta-label">00:00</span>
             </div>
 
-            <div class="progress-track w-full h-1 rounded-full mb-10">
-                <div id="progress-bar" class="h-1 btn-zarego rounded-full transition-all duration-500" style="width: 0%"></div>
+            <div class="progress-track">
+                <div id="progress-bar" class="progress-fill" style="width: 0%"></div>
             </div>
 
-            <p id="question-text" class="text-xl text-center mb-8 min-h-[80px] font-semibold leading-relaxed" style="color: var(--zarego-text);"></p>
+            <p id="question-text"></p>
 
-            <div class="rating-block mb-10">
+            <div class="rating-block" style="margin-top: 2rem;">
                 <div class="options-row">
                     <input type="radio" name="q" id="r1" value="1" class="hidden option-input" onchange="enableNext()"><label for="r1" class="option-btn">1</label>
                     <input type="radio" name="q" id="r2" value="2" class="hidden option-input" onchange="enableNext()"><label for="r2" class="option-btn">2</label>
@@ -323,31 +392,33 @@
                 </div>
             </div>
 
-            <button id="next-btn" onclick="nextQuestion()" disabled
-                class="btn-zarego w-full py-4 rounded-xl text-sm uppercase">
-                Next
-            </button>
+            <button id="next-btn" onclick="nextQuestion()" disabled class="btn-z">Continue</button>
+
         </div>
 
         <!-- ══════════════ FINAL SCREEN ══════════════ -->
-        <div id="final-screen" class="hidden text-center py-10">
-            <div class="check-circle">
-                <svg width="32" height="32" fill="none" stroke="url(#grad)" viewBox="0 0 24 24">
+        <div id="final-screen" class="hidden" style="text-align:center; padding: 3rem 0;">
+            <div class="check-wrap">
+                <svg width="36" height="36" fill="none" viewBox="0 0 24 24">
                     <defs>
-                        <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
-                            <stop offset="0%" stop-color="#00D2FF"/>
-                            <stop offset="100%" stop-color="#FF0055"/>
+                        <linearGradient id="cg" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <stop offset="0%" stop-color="#00AACC"/>
+                            <stop offset="50%" stop-color="#6B5CE7"/>
+                            <stop offset="100%" stop-color="#E8405A"/>
                         </linearGradient>
                     </defs>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path>
+                    <path stroke="url(#cg)" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
                 </svg>
             </div>
-            <div class="eyebrow mb-3">Assessment Complete</div>
-            <h2 class="text-5xl font-black uppercase mb-4 gradient-text" style="font-family: 'Barlow Condensed', sans-serif;">Thank You!</h2>
-            <p style="color: var(--zarego-muted); font-size: 0.95rem;">Your results have been successfully recorded.</p>
+            <div class="tag-label" style="display:inline-flex; margin-bottom:1rem;">All done</div>
+            <h1 style="font-size: clamp(1.8rem, 6vw, 2.5rem); margin-bottom: 0.75rem;">
+                Thank you<br>for your <span class="title-italic">time.</span>
+            </h1>
+            <div class="wave-line" style="margin-top: 1.25rem;"></div>
+            <p style="color: var(--z-mid); font-size: 0.9rem; margin-top: 1.25rem;">Your answers have been successfully recorded.</p>
         </div>
 
-    </div><!-- /#app -->
+    </div>
 
     <script>
         /* ════════════════════════════════════════════════
@@ -369,56 +440,56 @@
            PREGUNTAS ORIGINALES (IDs 1–50, nunca modificar)
         ════════════════════════════════════════════════ */
         const rawQuestions = [
-            {id:1,  text:"Have a rich vocabulary.",                                     cat:"O", rev:false},
-            {id:2,  text:"Am full of ideas.",                                           cat:"O", rev:false},
-            {id:3,  text:"Am quick to understand complex concepts.",                    cat:"O", rev:false},
-            {id:4,  text:"See beauty in things that others might not notice.",          cat:"O", rev:false},
-            {id:5,  text:"Enjoy trying new and unfamiliar things.",                     cat:"O", rev:false},
-            {id:6,  text:"Am curious about many different topics.",                     cat:"O", rev:false},
-            {id:7,  text:"Prefer to stick with things that I know.",                    cat:"O", rev:true},
-            {id:8,  text:"Dislike changes.",                                            cat:"O", rev:true},
-            {id:9,  text:"Avoid philosophical discussions.",                            cat:"O", rev:true},
-            {id:10, text:"Do not have a good imagination.",                             cat:"O", rev:true},
-            {id:11, text:"Pay attention to details.",                                   cat:"C", rev:false},
-            {id:12, text:"Follow a schedule.",                                          cat:"C", rev:false},
-            {id:13, text:"Plan tasks carefully before starting them.",                  cat:"C", rev:false},
-            {id:14, text:"Finish what I start.",                                        cat:"C", rev:false},
-            {id:15, text:"Keep my promises.",                                           cat:"C", rev:false},
-            {id:16, text:"Work hard to achieve my goals.",                              cat:"C", rev:false},
-            {id:17, text:"Often forget to put things back in their proper place.",      cat:"C", rev:true},
-            {id:18, text:"Find it difficult to stay focused on tasks.",                 cat:"C", rev:true},
-            {id:19, text:"Start tasks right away.",                                     cat:"C", rev:false},
-            {id:20, text:"Act without thinking things through.",                        cat:"C", rev:true},
-            {id:21, text:"Feel comfortable around people.",                             cat:"E", rev:false},
-            {id:22, text:"Make friends easily.",                                        cat:"E", rev:false},
-            {id:23, text:"Start conversations.",                                        cat:"E", rev:false},
-            {id:24, text:"Am the life of the party.",                                   cat:"E", rev:false},
-            {id:25, text:"Enjoy being the center of attention.",                        cat:"E", rev:false},
-            {id:26, text:"Feel energized when I am around others.",                     cat:"E", rev:false},
-            {id:27, text:"Don't talk a lot.",                                           cat:"E", rev:true},
-            {id:28, text:"Keep in the background.",                                     cat:"E", rev:true},
-            {id:29, text:"Prefer to spend time alone.",                                 cat:"E", rev:true},
-            {id:30, text:"Find it difficult to approach others.",                       cat:"E", rev:true},
-            {id:31, text:"Sympathize with others' feelings.",                           cat:"A", rev:false},
-            {id:32, text:"Take time out for others.",                                   cat:"A", rev:false},
-            {id:33, text:"Trust others.",                                               cat:"A", rev:false},
-            {id:34, text:"Love to help others.",                                        cat:"A", rev:false},
-            {id:35, text:"Am considerate and kind to almost everyone.",                 cat:"A", rev:false},
-            {id:36, text:"Am willing to compromise to avoid conflict.",                 cat:"A", rev:false},
-            {id:37, text:"Am not interested in other people's problems.",               cat:"A", rev:true},
-            {id:38, text:"Use flattery to get ahead.",                                  cat:"A", rev:true},
-            {id:39, text:"Believe that I am better than others.",                       cat:"A", rev:true},
-            {id:40, text:"Can be rude to others.",                                      cat:"A", rev:true},
-            {id:41, text:"Get stressed out easily.",                                    cat:"N", rev:false},
-            {id:42, text:"Worry about things.",                                         cat:"N", rev:false},
-            {id:43, text:"Get irritated easily.",                                       cat:"N", rev:false},
-            {id:44, text:"Change my mood frequently.",                                  cat:"N", rev:false},
-            {id:45, text:"Feel insecure about myself.",                                 cat:"N", rev:false},
-            {id:46, text:"Often feel anxious or tense.",                                cat:"N", rev:false},
-            {id:47, text:"Am relaxed most of the time.",                                cat:"N", rev:true},
-            {id:48, text:"Remain calm under pressure.",                                 cat:"N", rev:true},
-            {id:49, text:"Am easily intimidated.",                                      cat:"N", rev:false},
-            {id:50, text:"Feel emotionally stable most of the time.",                   cat:"N", rev:true},
+            {id:1,  text:"I have a rich vocabulary.",                                   cat:"O", rev:false},
+            {id:2,  text:"I am full of ideas.",                                         cat:"O", rev:false},
+            {id:3,  text:"I am quick to understand complex concepts.",                  cat:"O", rev:false},
+            {id:4,  text:"I see beauty in things that others might not notice.",        cat:"O", rev:false},
+            {id:5,  text:"I enjoy trying new and unfamiliar things.",                   cat:"O", rev:false},
+            {id:6,  text:"I am curious about many different topics.",                   cat:"O", rev:false},
+            {id:7,  text:"I prefer to stick with things that I know.",                  cat:"O", rev:true},
+            {id:8,  text:"I dislike changes.",                                          cat:"O", rev:true},
+            {id:9,  text:"I avoid philosophical discussions.",                          cat:"O", rev:true},
+            {id:10, text:"I do not have a good imagination.",                           cat:"O", rev:true},
+            {id:11, text:"I pay attention to details.",                                 cat:"C", rev:false},
+            {id:12, text:"I follow a schedule.",                                        cat:"C", rev:false},
+            {id:13, text:"I plan tasks carefully before starting them.",                cat:"C", rev:false},
+            {id:14, text:"I finish what I start.",                                      cat:"C", rev:false},
+            {id:15, text:"I keep my promises.",                                         cat:"C", rev:false},
+            {id:16, text:"I work hard to achieve my goals.",                            cat:"C", rev:false},
+            {id:17, text:"I often forget to put things back in their proper place.",    cat:"C", rev:true},
+            {id:18, text:"I find it difficult to stay focused on tasks.",               cat:"C", rev:true},
+            {id:19, text:"I start tasks right away.",                                   cat:"C", rev:false},
+            {id:20, text:"I act without thinking things through.",                      cat:"C", rev:true},
+            {id:21, text:"I feel comfortable around people.",                           cat:"E", rev:false},
+            {id:22, text:"I make friends easily.",                                      cat:"E", rev:false},
+            {id:23, text:"I start conversations.",                                      cat:"E", rev:false},
+            {id:24, text:"I am the life of the party.",                                 cat:"E", rev:false},
+            {id:25, text:"I enjoy being the center of attention.",                      cat:"E", rev:false},
+            {id:26, text:"I feel energized when I am around others.",                   cat:"E", rev:false},
+            {id:27, text:"I don't talk a lot.",                                         cat:"E", rev:true},
+            {id:28, text:"I am reserved in social situations.",                         cat:"E", rev:true},
+            {id:29, text:"I prefer to spend time alone.",                               cat:"E", rev:true},
+            {id:30, text:"I find it difficult to approach others.",                     cat:"E", rev:true},
+            {id:31, text:"I sympathize with others' feelings.",                         cat:"A", rev:false},
+            {id:32, text:"I take time out for others.",                                 cat:"A", rev:false},
+            {id:33, text:"I trust others.",                                             cat:"A", rev:false},
+            {id:34, text:"I love to help others.",                                      cat:"A", rev:false},
+            {id:35, text:"I am considerate and kind to almost everyone.",               cat:"A", rev:false},
+            {id:36, text:"I am willing to compromise to avoid conflict.",               cat:"A", rev:false},
+            {id:37, text:"I am not interested in other people's problems.",             cat:"A", rev:true},
+            {id:38, text:"I put my own interests above the needs of others.",           cat:"A", rev:true},
+            {id:39, text:"I believe that I am better than others.",                     cat:"A", rev:true},
+            {id:40, text:"I speak my mind, even if it hurts others' feelings.",         cat:"A", rev:true},
+            {id:41, text:"I get stressed out easily.",                                  cat:"N", rev:false},
+            {id:42, text:"I worry about things.",                                       cat:"N", rev:false},
+            {id:43, text:"I get irritated easily.",                                     cat:"N", rev:false},
+            {id:44, text:"I change my mood frequently.",                                cat:"N", rev:false},
+            {id:45, text:"I feel insecure about myself.",                               cat:"N", rev:false},
+            {id:46, text:"I often feel anxious or tense.",                              cat:"N", rev:false},
+            {id:47, text:"I am relaxed most of the time.",                              cat:"N", rev:true},
+            {id:48, text:"I remain calm under pressure.",                               cat:"N", rev:true},
+            {id:49, text:"I am easily intimidated.",                                    cat:"N", rev:false},
+            {id:50, text:"I feel emotionally stable most of the time.",                 cat:"N", rev:true},
         ];
 
         /* ════════════════════════════════════════════════
@@ -526,7 +597,7 @@
         function showQuestion() {
             const q = shuffledQuestions[currentIdx];
             document.getElementById('question-text').innerText = q.text;
-            document.getElementById('progress-text').innerText = (currentIdx + 1) + "/50";
+            document.getElementById('progress-text').innerText = (currentIdx + 1) + " / 50";
             document.getElementById('progress-bar').style.width = ((currentIdx + 1) / 50 * 100) + "%";
 
             document.querySelectorAll('.option-input').forEach(input => {
@@ -572,14 +643,9 @@
         ════════════════════════════════════════════════ */
         async function submitTest() {
             document.getElementById('test-screen').innerHTML =
-                `<div class='text-center py-20' style='color: var(--zarego-muted);'>
-                    <div style='display:flex;align-items:center;justify-content:center;margin-bottom:1rem;'>
-                        <svg class='animate-spin-slow' width='32' height='32' viewBox='0 0 24 24' fill='none' stroke='url(#sg)'>
-                            <defs><linearGradient id='sg' x1='0%' y1='0%' x2='100%' y2='0%'><stop offset='0%' stop-color='#00D2FF'/><stop offset='100%' stop-color='#FF0055'/></linearGradient></defs>
-                            <path stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M12 3v3m0 12v3M3 12h3m12 0h3M5.64 5.64l2.12 2.12m8.49 8.49l2.12 2.12M5.64 18.36l2.12-2.12m8.49-8.49l2.12-2.12'/>
-                        </svg>
-                    </div>
-                    <p class='eyebrow tracking-widest'>Sending Results…</p>
+                `<div style="text-align:center; padding: 5rem 0; color: var(--z-mid);">
+                    <div style="font-size:1.8rem; margin-bottom:1rem;" class="spin">◌</div>
+                    <p style="font-size:0.78rem; font-weight:600; letter-spacing:0.12em; text-transform:uppercase;">Sending your answers…</p>
                 </div>`;
 
             const scores = { O: 0, C: 0, E: 0, A: 0, N: 0 };
@@ -596,11 +662,11 @@
             const payload = {
                 nombre:      document.getElementById('user-name').value,
                 email:       document.getElementById('user-email').value,
-                O:           (scores.O / 10).toFixed(2),
-                C:           (scores.C / 10).toFixed(2),
-                E:           (scores.E / 10).toFixed(2),
-                A:           (scores.A / 10).toFixed(2),
-                N:           (scores.N / 10).toFixed(2),
+                O: parseFloat((scores.O / 10).toFixed(2)),
+                C: parseFloat((scores.C / 10).toFixed(2)),
+                E: parseFloat((scores.E / 10).toFixed(2)),
+                A: parseFloat((scores.A / 10).toFixed(2)),
+                N: parseFloat((scores.N / 10).toFixed(2)),
                 tiempo:      Math.floor(diff / 60) + "m " + (diff % 60) + "s",
                 individuales: responses
             };
@@ -626,8 +692,7 @@
         }
 
         /* ════════════════════════════════════════════════
-           AL CARGAR LA PÁGINA:
-           Restaurar nombre/email si existe sesión previa
+           AL CARGAR LA PÁGINA
         ════════════════════════════════════════════════ */
         (function initPage() {
             const savedName  = localStorage.getItem(LS_KEY.name);
@@ -640,7 +705,6 @@
             }
         })();
 
-        // Pausar el timer al salir/refrescar
         function freezeTimer() {
             if (timerInterval && startTime) {
                 elapsedSeconds += Math.floor((new Date() - startTime) / 1000);
